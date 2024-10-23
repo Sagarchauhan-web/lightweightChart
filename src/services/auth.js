@@ -10,6 +10,18 @@ export const me = async () => {
   }
 };
 
+// reigster the new user Dablu
+export const register = async (requestData) => {
+  try {
+    const response = await apiClient.post("/users", requestData);
+    return response.data;
+  } catch (error) {
+    console.error("Error registering user:", error);
+    throw error;
+  }
+};
+
+
 export const getTokenUrl = async () => {
   try {
     const response = await apiClient.get("/GetTokenUrl");
@@ -27,25 +39,8 @@ export const login = async (requestData) => {
     return error;
   }
 };
+ 
 
-// export const SetAccountType = async (requestData) => {
-//   try {
-//     const response = await apiClient.post('/SetAccountType', requestData);
-//     return response.data;
-//   } catch (error) {
-//     return error;
-//   }
-// };
-
-export const register = async (requestData) => {
-  try {
-    const response = await apiClient.post("/SignUp", requestData);
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
 
 // export const logout = async () => {
 //   try {

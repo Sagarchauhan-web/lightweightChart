@@ -1,8 +1,16 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+const { blackA } = require("@radix-ui/colors");
+
+module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        ...blackA, // Extends the blackA color from Radix UI colors
+      },
+    },
   },
-  plugins: [],
+  plugins: [
+    require('tailwind-scrollbar'), // Adds the scrollbar plugin
+  ],
 };

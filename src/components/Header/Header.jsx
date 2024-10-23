@@ -1,214 +1,105 @@
-import React, { useState } from "react"
-import {
-  AppBar,
-  Toolbar,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Chip,
-  MenuItem,
-  Paper,
-  Modal,
-  InputAdornment,
-} from "@mui/material"
-import SearchIcon from "@mui/icons-material/Search"
+import React, { useState } from 'react';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import CircularProgress from '@mui/material/CircularProgress';
 
-// Mock data for demonstration
-const mockData = [
-    { symbol: "AAPL", name: "Apple Inc.", type: "stocks" },
-    { symbol: "MSFT", name: "Microsoft Corporation", type: "stocks" },
-    { symbol: "GOOGL", name: "Alphabet Inc. (Class A)", type: "stocks" },
-    { symbol: "AMZN", name: "Amazon.com Inc.", type: "stocks" },
-    { symbol: "TSLA", name: "Tesla Inc.", type: "stocks" },
-    { symbol: "FB", name: "Meta Platforms Inc.", type: "stocks" },
-    { symbol: "NFLX", name: "Netflix Inc.", type: "stocks" },
-    { symbol: "NVDA", name: "NVIDIA Corporation", type: "stocks" },
-    { symbol: "JPM", name: "JPMorgan Chase & Co.", type: "stocks" },
-    { symbol: "V", name: "Visa Inc.", type: "stocks" },
-    { symbol: "PYPL", name: "PayPal Holdings Inc.", type: "stocks" },
-    { symbol: "NFLX", name: "Netflix Inc.", type: "stocks" },
-    { symbol: "BTC", name: "Bitcoin", type: "crypto" },
-    { symbol: "ETH", name: "Ethereum", type: "crypto" },
-    { symbol: "XRP", name: "XRP (Ripple)", type: "crypto" },
-    { symbol: "LTC", name: "Litecoin", type: "crypto" },
-    { symbol: "ADA", name: "Cardano", type: "crypto" },
-    { symbol: "DOGE", name: "Dogecoin", type: "crypto" },
-    { symbol: "DOT", name: "Polkadot", type: "crypto" },
-    { symbol: "SOL", name: "Solana", type: "crypto" },
-    { symbol: "LINK", name: "Chainlink", type: "crypto" },
-    { symbol: "MATIC", name: "Polygon", type: "crypto" },
-    { symbol: "BNB", name: "Binance Coin", type: "crypto" },
-    { symbol: "USDT", name: "Tether", type: "crypto" },
-    { symbol: "SPY", name: "SPDR S&P 500 ETF Trust", type: "etf" },
-    { symbol: "IVV", name: "iShares Core S&P 500 ETF", type: "etf" },
-    { symbol: "VOO", name: "Vanguard S&P 500 ETF", type: "etf" },
-    { symbol: "GLD", name: "SPDR Gold Shares", type: "etf" },
-    { symbol: "SLV", name: "iShares Silver Trust", type: "etf" },
-    { symbol: "VTI", name: "Vanguard Total Stock Market ETF", type: "etf" },
-    { symbol: "XLF", name: "Financial Select Sector SPDR Fund", type: "etf" },
-    { symbol: "XLY", name: "Consumer Discretionary Select Sector SPDR Fund", type: "etf" },
-    { symbol: "XLC", name: "Communication Services Select Sector SPDR Fund", type: "etf" },
-    { symbol: "XLB", name: "Materials Select Sector SPDR Fund", type: "etf" },
-    { symbol: "XLI", name: "Industrial Select Sector SPDR Fund", type: "etf" },
-    { symbol: "XLC", name: "Consumer Staples Select Sector SPDR Fund", type: "etf" },
-  ]
-  
+const SymbolSearch = () => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState([]);
 
-// Modal styling
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  p: 5,
-  borderRadius: 2,
-  boxShadow: 24,
-  maxHeight: "80vh",
-  overflowY: "auto",
-}
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setQuery('');
+    setResults([]);
+  };
 
-const Header = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [searchResults, setSearchResults] = useState([])
-  const [filter, setFilter] = useState("All")
-  const [openModal, setOpenModal] = useState(false)
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '100%',
+    maxWidth: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    borderRadius: '8px',
+    p: 4,
+  };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.target
-    setSearchTerm(value)
+  // Function to fetch data from the API (Replace the API URL with an actual symbol search API)
+  const fetchData = async (searchTerm) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`https://api.example.com/search?q=${searchTerm}`);
+      const data = await response.json();
+      setResults(data.results); // Assume `results` is the array returned by the API
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setLoading(false);
+  };
 
-    const filteredResults = mockData.filter(
-      (item) =>
-        item.symbol.toLowerCase().includes(value.toLowerCase()) &&
-        (filter === "All" || item.type === filter.toLowerCase())
-    )
-    setSearchResults(filteredResults)
-  }
+  // Handle input change and call fetch function
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault()
-    onSearch(searchTerm)
-    setOpenModal(false)
-  }
-
-  const handleFilterChange = (newFilter) => setFilter(newFilter)
-
-  const handleResultClick = (symbol) => {
-    setSearchTerm(symbol) // Update the search term with the selected symbol
-    setOpenModal(false)
-    onSearch(symbol) // Call the onSearch function with the selected symbol
-  }
-
-  const handleCloseModal = () => setOpenModal(false)
-
-  const handleFieldClick = () => {
-    setOpenModal(true)
-  }
+    if (value.length >= 2) { // Start searching after 2 characters
+      fetchData(value);
+    } else {
+      setResults([]);
+    }
+  };
 
   return (
-    <>
-      {/* AppBar with sticky behavior */}
-      <AppBar position="sticky" sx={{ backgroundColor: "#ffffff", paddingY: 1 }}>
-        <Toolbar sx={{ display: "flex", justifyContent: "flex-start", alignItems: "flex-start" }}>
-          {/* Left-aligned Search Box */}
-          <Box sx={{ display: "flex", alignItems: "center", marginTop: 1 }}>
-            <Box sx={{ position: "relative", width: 200 }}>
-              <TextField
-                variant="outlined"
-                placeholder="Search Symbol"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                fullWidth
-                size="small"
-                sx={{ backgroundColor: "#fff", borderRadius: 1 }}
-                onClick={handleFieldClick} // Open modal on click
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                    sx: { paddingRight: "20px" },
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
-   
-      {/* Modal for detailed search */}
-      <Modal open={openModal} onClose={handleCloseModal}>
+    <div>
+      {/* Input field that opens the modal */}
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search symbol..."
+        size="small"
+        value={query}
+        onClick={handleOpen} // Open the modal when input is clicked
+        onChange={handleInputChange} // Update query and fetch data
+      />
+
+      <Modal open={open} onClose={handleClose} aria-labelledby="symbol-search-modal">
         <Box sx={modalStyle}>
-              {/* Modal Title */}
-          <Typography variant="h6" sx={{ marginBottom: 2, textAlign: "center" }}>
-            Symbol Search
+          <Typography variant="h6" component="h2" mb={2}>
+            Search for a Symbol
           </Typography>
-          {/* Filter Chips */}
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 1, marginBottom: 3 }}>
-            {["All", "Stocks", "Crypto"].map((filterOption) => (
-              <Chip
-                key={filterOption}
-                label={filterOption}
-                onClick={() => handleFilterChange(filterOption)}
-                variant={filter === filterOption ? "filled" : "outlined"}
-                clickable
-              />
-            ))}
-          </Box>
-
-          {/* Search Input in Modal */}
-          <form onSubmit={handleSearchSubmit}>
-            <TextField
-              variant="outlined"
-              placeholder="Enter Symbol"
-              value={searchTerm} // Keep showing the selected symbol
-              onChange={handleSearchChange}
-              fullWidth
-              sx={{ marginBottom: 2 }}
-            />
-            {/* <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              sx={{ backgroundColor: "#1976d2", fontWeight: "bold", paddingY: 1.5 }}
-            >
-              Search
-            </Button> */}
-          </form>
-
-          {/* Search Results in Modal */}
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search symbol..."
+            size="small"
+            value={query}
+            onChange={handleInputChange}
+          />
           
-  
-          <Box sx={{ marginTop: 3, maxHeight: 200, overflowY: "auto" }}>
-         
-   
-  
-            {searchResults.length > 0 ? (
-              searchResults.map((result) => (
-                <Box
-                  key={result.symbol}
-                  sx={{ display: "flex", justifyContent: "space-between", paddingY: 1.5, cursor: "pointer" }}
-                  onClick={() => handleResultClick(result.symbol)}
-                >
-                  <Typography>{result.symbol}</Typography>
-                  <Typography>{result.name}</Typography>
-                </Box>
-              ))
-            ) : (
-              <Typography variant="body2" sx={{ textAlign: "center", fontStyle: "italic" }}>
-                No results found
-              </Typography>
-            )}
-          </Box>
+          {/* Show loading spinner while fetching */}
+          {loading && <CircularProgress size={24} sx={{ mt: 2 }} />}
+
+          {/* Show search results */}
+          <List sx={{ mt: 2, maxHeight: 200, overflow: 'auto' }}>
+            {results.map((result, index) => (
+              <ListItem key={index}>
+                {result.symbol} - {result.name}
+              </ListItem>
+            ))}
+          </List>
         </Box>
       </Modal>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default Header
+export default SymbolSearch;

@@ -1,43 +1,45 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';  // Ensure the Input component is imported
-import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import { useRef, useState } from 'react';
-import { IoIosCheckmarkCircle } from 'react-icons/io';
-import { MdErrorOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
-
+import Success from '../../components/Scuccess/Scuccess';
 export function Auth() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
+  const [isLogin, setIsLogin] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(''); // Add success state
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true); // State to toggle between login and signup
 
   async function onSubmit(e) {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
-    const confirmPassword = confirmPasswordRef.current?.value; // Check if confirmPasswordRef exists
+    const confirmPassword = confirmPasswordRef.current.value;
 
-    // Basic validation
     if (!email || !password) {
-      alert('Please fill in all required fields');
+      setError('Please fill in all required fields');
       return;
     }
 
     if (!isLogin && password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
 
+    setError('');
+    setLoading(true);
+
     try {
       const url = isLogin
-        ? 'https://346e-150-107-43-32.ngrok-free.app/users/login' // Login API
-        : 'https://346e-150-107-43-32.ngrok-free.app/users/'; // Signup API
+        ? 'http://localhost:5000/users/login'
+        : 'http://localhost:5000/users/';
 
       const response = await axios.post(url, {
         email,
@@ -46,11 +48,15 @@ export function Auth() {
 
       if (response?.data) {
         localStorage.setItem('token', response.data.token);
-        navigate('/dashboard/home');
-        alert(`${isLogin ? 'Login' : 'Registration'} successful!`);
+        setSuccess(isLogin ? 'Login successful' : 'Registration successful'); // Set success message
+        setTimeout(() => {
+          navigate('/dashboard/');
+        }, 2000); // Navigate after a delay
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'An error occurred');
+      setError(error.response?.data?.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -64,7 +70,7 @@ export function Auth() {
           <Card className='mx-10 md:m-0'>
             <CardHeader className='mb-6'>
               <CardTitle className='text-3xl mt-14'>{isLogin ? 'Login' : 'Register'}</CardTitle>
-              <CardDescription>{isLogin ? 'Log in to your account' : 'Create an account to start Use TradeCalculator TO OPTMIZE RISK'}</CardDescription>
+              <CardDescription>{isLogin ? 'Login to your account' : 'Create an account to start trading'}</CardDescription>
             </CardHeader>
             <form onSubmit={onSubmit}>
               <CardContent className='pb-0'>
@@ -86,16 +92,18 @@ export function Auth() {
                 </div>
               </CardContent>
               <div className='mt-6 flex justify-center'>
-                <Button type='submit' className='rounded-full w-full'>
-                  {isLogin ? 'Login' : 'Register'}
+                <Button type='submit' className='rounded-full w-full' disabled={loading}>
+                  {loading ? 'Loading...' : (isLogin ? 'Login' : 'Register')}
                 </Button>
               </div>
+              {error && <div className='mt-4 text-red-500 text-center'>{error}</div>}
+              {success && <Success message={success} />} {/* Display the Success component */}
+              <div className='mt-4 text-center'>
+                <button type='button' onClick={() => setIsLogin(!isLogin)} className='text-blue-600'>
+                  {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+                </button>
+              </div>
             </form>
-            <div className='mt-4 text-center'>
-              <button onClick={() => setIsLogin(!isLogin)} className='text-blue-500 hover:underline'>
-                {isLogin ? 'Create an account' : 'Already have an account? Log in'}
-              </button>
-            </div>
           </Card>
         </div>
       </div>
