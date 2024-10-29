@@ -1,8 +1,7 @@
-import { getToken } from '@/services/Auth/auth';
+import { getToken } from '../services/auth';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = 'https://47e9-150-107-43-93.ngrok-free.app'; 
+const API_URL = 'https://ec5a-150-107-42-249.ngrok-free.app/'; 
 
 const apiClient = axios.create({
   baseURL: `${API_URL}`,

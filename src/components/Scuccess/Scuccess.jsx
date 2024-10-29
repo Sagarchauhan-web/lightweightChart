@@ -2,7 +2,7 @@ export default function Success() {
   return (
     <div className='flex flex-col items-center justify-center h-screen bg-white dark:bg-gray-950'>
       <div className='bg-green-500 rounded-full p-4 mb-6'>
-        <CheckIcon className='text-white h-8 w-8' />
+        <CheckIcon className='text-white h-8 w-8' aria-label="Success check mark" />
       </div>
       <h1 className='text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2'>
         Success!
@@ -24,6 +24,8 @@ function CheckIcon(props) {
       strokeWidth='2'
       strokeLinecap='round'
       strokeLinejoin='round'
+      role="img" // Improves accessibility
+      aria-hidden="true" // Indicates that it's decorative
     >
       <polyline points='20 6 9 17 4 12' />
     </svg>

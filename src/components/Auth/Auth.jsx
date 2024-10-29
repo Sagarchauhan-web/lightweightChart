@@ -2,10 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';  // Ensure the Input component is imported
-import { cn } from '@/lib/utils';
 import { useRef, useState } from 'react';
-import { IoIosCheckmarkCircle } from 'react-icons/io';
-import { MdErrorOutline } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import axios from 'axios';
@@ -21,7 +18,7 @@ export function Auth() {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
-    const confirmPassword = confirmPasswordRef.current?.value; // Check if confirmPasswordRef exists
+    const confirmPassword = isLogin ? null : confirmPasswordRef.current.value; // Get value only if not logging in
 
     // Basic validation
     if (!email || !password) {
@@ -36,8 +33,8 @@ export function Auth() {
 
     try {
       const url = isLogin
-        ? 'https://346e-150-107-43-32.ngrok-free.app/users/login' // Login API
-        : 'https://346e-150-107-43-32.ngrok-free.app/users/'; // Signup API
+        ? 'https://ec5a-150-107-42-249.ngrok-free.app/users/login' // Login API
+        : 'https://ec5a-150-107-42-249.ngrok-free.app/users/'; // Signup API
 
       const response = await axios.post(url, {
         email,
@@ -45,12 +42,12 @@ export function Auth() {
       });
 
       if (response?.data) {
-        localStorage.setItem('token', response.data.token);
-        navigate('/dashboard/home');
-        alert(`${isLogin ? 'Login' : 'Registration'} successful!`);
+        localStorage.setItem("token", response.data.token);
+        navigate("/dashboard");
+        alert(`${isLogin ? "Login" : "Registration"} successful!`);
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'An error occurred');
+      alert(error.response?.data?.message || 'An error occurred during submission');
     }
   }
 
@@ -64,7 +61,7 @@ export function Auth() {
           <Card className='mx-10 md:m-0'>
             <CardHeader className='mb-6'>
               <CardTitle className='text-3xl mt-14'>{isLogin ? 'Login' : 'Register'}</CardTitle>
-              <CardDescription>{isLogin ? 'Log in to your account' : 'Create an account to start Use TradeCalculator TO OPTMIZE RISK'}</CardDescription>
+              <CardDescription>{isLogin ? 'Log in to your account' : 'Create an account to start using TradeCalculator to optimize risk.'}</CardDescription>
             </CardHeader>
             <form onSubmit={onSubmit}>
               <CardContent className='pb-0'>

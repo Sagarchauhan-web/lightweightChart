@@ -6,11 +6,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        ...blackA, // Extends the blackA color from Radix UI colors
+        ...blackA, // Extends the blackA colors from Radix UI for custom black transparency levels
       },
     },
   },
   plugins: [
-    require('tailwind-scrollbar'), // Adds the scrollbar plugin
+    require('tailwind-scrollbar'), // Adds custom scrollbar styling
   ],
 };
