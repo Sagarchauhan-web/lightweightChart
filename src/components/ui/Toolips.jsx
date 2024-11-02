@@ -1,15 +1,14 @@
-// Tooltip.jsx
-import React from 'react';
+import React from "react";
 
 const Tooltip = ({ children, text }) => {
-    return (
-        <div className="relative flex items-center group">
-            {children}
-            <div className="absolute left-full mr-2 whitespace-nowrap bg-gray-900 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                {text}
-            </div>
-        </div>
-    );
+  return (
+    <div className="relative">
+      {children}
+      <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 text-center py-1 text-sm font-medium text-white bg-gray-800 rounded-md shadow-lg z-10 opacity-0 transition-opacity duration-300 ease-in-out">
+        {text}
+      </div>
+    </div>
+  );
 };
 
 export default Tooltip;

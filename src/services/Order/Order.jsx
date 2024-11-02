@@ -16,3 +16,21 @@ export const placeOrder = async (orderData) => {
     throw error; // Rethrow the error for further handling if needed
   }
 };
+
+  
+export const getOrders = async () => {
+  try {
+    const token = getToken(); // Retrieve the token
+    const response = await apiClient.get('/order/getOrdersInTradovate', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // Return the response data
+  } catch (error) {
+    console.error("Error fetching order list:", error);
+    throw error;
+  }
+};
+
+ 
