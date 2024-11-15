@@ -4,11 +4,14 @@ import SearchTicker from '../SearchTicker/SearchTicker'; // Ensure this is the c
 
 const Header = ({ onSearch }) => {
   return (
-    <header className="flex items-center justify-between p-4 bg-white shadow-auto">
+    <header className="flex items-center justify-between p-2 bg-white">
+      <div className="flex items-center">
        
       <SearchTicker onSearch={onSearch} />
+      </div>
     </header>
   );
 };
 
 export default Header;
+ 

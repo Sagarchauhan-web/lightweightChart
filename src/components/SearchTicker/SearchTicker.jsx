@@ -311,8 +311,7 @@ const SearchTicker = () => {
   return (
     <>
       {/* Header */}
-      <header className="flex items-center justify-between p-3 bg-white shadow-md w-full">
-        <div className="flex items-center border border-gray-300 rounded-full px-3 py-1 w-3/4 max-w-xs hover:shadow-sm transition-shadow">
+         <div className="flex items-center border border-gray-300 rounded-full px-3 py-1 w-3/4 max-w-xs hover:shadow-sm transition-shadow">
           <FaSearch className="text-gray-500 mr-1" />
           <input
             type="text"
@@ -323,8 +322,7 @@ const SearchTicker = () => {
             readOnly
           />
         </div>
-      </header>
-
+ 
       {/* Symbol Search Modal */}
       <SymbolSearchModal
         isOpen={isModalOpen}

@@ -1,9 +1,8 @@
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
-// import { DateRange } from 'react-day-picker';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar } from '@/components/ui/calendar'; // Ensure this is your date picker component
 import {
   Popover,
   PopoverContent,
@@ -42,11 +41,11 @@ export function DatePickerWithRange({ className, date, setDate }) {
         <PopoverContent className='w-auto p-0' align='start'>
           <Calendar
             initialFocus
-            mode='range'
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
-            numberOfMonths={2}
+            mode='range' // Ensure the mode is set to 'range'
+            defaultMonth={date?.from || new Date()} // Default to the current month if no date is selected
+            selected={date} // Pass the selected date range
+            onSelect={setDate} // Update the selected date range
+            numberOfMonths={2} // Show two months side by side
           />
         </PopoverContent>
       </Popover>

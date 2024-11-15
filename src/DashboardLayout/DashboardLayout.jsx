@@ -10,21 +10,21 @@ export default function DashboardLayout({ togglePriceBoxes, toggleCalculator, to
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-gray-100 to-gray-200 overflow-hidden">
-    {/* Using a gradient background for a modern look */}
-    <div className="flex-1 flex flex-col">
-      {/* Pass the handleSearch function to Header */}
-      <Header onSearch={handleSearch} />
-      <main className="flex-1 p-0 overflow-hidden">
-        {/* Increased padding for a more spacious feel */}
-        <div className="bg-white rounded-lg shadow-md p-1 mt-0"> {/* Minimal top margin */}
-          {/* Dashboard with minimal margin from the header */}
-          <Dashboard />
-          <Outlet />
-        </div>
-      </main>
+    <div className="flex h-screen bg-gradient-to-b from-gray-100 to-gray-300 overflow-hidden">
+      {/* Main Container fills the viewport height */}
+      <div className="flex-1 flex flex-col h-full">
+        
+        {/* Header */}
+        <Header onSearch={handleSearch} />
+        
+        {/* Main Content Area without scrolling */}
+        <main className="flex-1 flex flex-col h-full overflow-hidden">
+          <div className="bg-white rounded-lg shadow-md p-0.5 flex-1 ">
+            {/* Dashboard and Outlet */}
+            <Dashboard />
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
-  </div>
-  
-  );
-}
+  )}
