@@ -69,16 +69,14 @@
 // }
 
 // export default App;
-
 import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout/DashboardLayout';
 import { OrderTable } from './pages/OrderTable/OrderTable';
 
 function App() {
-  
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<DashboardLayout />}>
           {/* Add other routes that are part of the DashboardLayout here */}
@@ -86,11 +84,8 @@ function App() {
         {/* Independent route for the Order Table */}
         <Route path="/order-table" element={<OrderTable />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
 
 export default App;
-
-
- 

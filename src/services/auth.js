@@ -61,8 +61,7 @@ export const getTickerData = async (symbol, startDate, endDate) => {
 
   try {
     const response = await apiClient.post("/order/tickerData", payload);
-    // Assuming the API returns the ticker data in a similar structure as before
-    return JSON.parse(response.data.data); // Parsing the data if it's a string
+    return response.data.data; // Return the data array directly
   } catch (error) {
     console.error("Error fetching ticker data:", error);
     throw error;

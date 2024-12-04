@@ -1,4 +1,5 @@
 // import React, { useEffect, useRef, useState } from "react";
+
 // import { createChart } from "lightweight-charts";
 // import Sidebar from "../../components/ui/Sidebar";
 // import SearchTicker from "../../components/SearchTicker/SearchTicker";
@@ -8,23 +9,33 @@
 // import { toast } from "@/components/ui/use-toast";
 // import { cn } from "@/lib/utils";
 // import { IoIosCheckmarkCircle } from "react-icons/io";
-
+// import { useLocation } from "react-router-dom";
 // import { OrderTable } from "../OrderTable/OrderTable";
+// import { modifyOrder } from "../../services/Order/Order";
+// import { getTickerData } from "../../services/auth";
 
 // function Dashboard() {
-//   const [entryPrice, setEntryPrice] = useState();
-//   const [stopLossPrice, setStopLossPrice] = useState();
-//   const [takeProfit, setTakeProfit] = useState();
+//   const [entryPrice, setEntryPrice] = useState(82);
+//   const [stopLossPrice, setStopLossPrice] = useState(60);
+//   const [takeProfit, setTakeProfit] = useState(89);
 //   const [isBuyActive, setIsBuyActive] = useState(true);
-//   const [orderType, setOrderType] = useState("MKT");
+//   const [orderType, setOrderType] = useState(" ");
 //   const chartRef = useRef(null);
 //   const [arePricesVisible, setArePricesVisible] = useState(false);
 //   const [isDragging, setIsDragging] = useState(false);
 //   const [draggedLine, setDraggedLine] = useState(null);
 //   const [showCalculator, setShowCalculator] = useState(false);
-//   const [quantity, setQuantity] = useState('');
+
+//   const [quantity, setQuantity] = useState("");
+//   const [arePricesVisibleModifiy, setarePricesVisibleModifiy] = useState(true);
 
 //   const navigate = useNavigate();
+//   const { state } = useLocation();
+//   const clearInputs = () => {
+//     setEntryPrice("");
+//     setStopLossPrice("");
+//     setTakeProfit("");
+//   };
 
 //   const togglePriceBoxes = () => {
 //     setArePricesVisible((prev) => !prev);
@@ -39,16 +50,305 @@
 //     setShowCalculator((prev) => !prev);
 //     setArePricesVisible(false);
 //   };
+//   const location = useLocation(); // Access the location state directly
+
+//   useEffect(() => {
+//     // Initialize the chart instance
+//     chartInstance.current = createChart(chartRef.current, {
+//       layout: {
+//         textColor: "#333",
+//         background: { type: "solid", color: "#ffffff" },
+//       },
+//       grid: {
+//         horzLines: { color: "#efefef" },
+//         vertLines: { color: "#efefef" },
+//       },
+//       crossHair: { mode: 0 },
+//     });
+
+//     // Add candlestick series to the chart
+//     candlestickSeries.current = chartInstance.current.addCandlestickSeries({
+//       upColor: "#26a69a",
+//       downColor: "#ef5350",
+//       borderVisible: false,
+//       wickUpColor: "#26a69a",
+//       wickDownColor: "#ef5350",
+//     });
+
+//     // Function to fetch and process ticker data
+//     const fetchData = async () => {
+//       try {
+//         const apiData = await getTickerData("TCS", "2020-01-01", "2024-12-31");
+//         console.log("Fetched API data:", apiData); // Debugging line
+
+//         // Process the fetched data into the format required by the chart
+//         const chartData = apiData
+//           .map((item) => ({
+//             time: new Date(item.index).getTime() / 1000, // Convert date to Unix timestamp (seconds)
+//             open: item.open,
+//             high: item.high,
+//             low: item.low,
+//             close: item.close,
+//           }))
+//           .filter(
+//             (data) =>
+//               data.time && data.open && data.high && data.low && data.close
+//           )
+//           .sort((a, b) => a.time - b.time); // Sort by time in ascending order
+
+//         console.log("Formatted chart data:", chartData); // Debugging line
+
+//         // Update the chart with the processed data
+//         candlestickSeries.current.setData(chartData);
+//       } catch (error) {
+//         console.error("Error fetching ticker data:", error);
+//       }
+//     };
+
+//     // Call fetchData when the component mounts
+//     fetchData();
+
+//     // Initialize horizontal lines for Stop Loss, Take Profit, and Entry
+//     stopLossLine.current = chartInstance.current.addLineSeries({
+//       color: "red",
+//       lineWidth: 2, // Solid line width
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0, // Solid line
+//     });
+
+//     takeProfitLine.current = chartInstance.current.addLineSeries({
+//       color: "green",
+//       lineWidth: 2, // Solid line width
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0, // Solid line
+//     });
+
+//     entryLine.current = chartInstance.current.addLineSeries({
+//       color: "blue",
+//       lineWidth: 2, // Solid line width
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0, // Solid line
+//     });
+
+//     // Cleanup function to remove the chart instance when the component unmounts
+//     return () => {
+//       chartInstance.current.remove();
+//     };
+//   }, []); // Empty dependency array ensures this effect runs only once
+
+  
+//   // Handle the state when the location changes
+//   useEffect(() => {
+//     if (location.state) {
+//       const {
+//         orderId,
+//         initialOrderType,
+//         orderQty,
+//         stopLossId,
+//         stopLossPricez,
+//         takeProfitId,
+//         takeProfitPricex,
+//         isfromModify,
+//       } = location.state;
+
+//       console.log("Received State:", {
+//         orderId,
+//         initialOrderType,
+//         orderQty,
+//         stopLossId,
+//         stopLossPricez,
+//         takeProfitId,
+//         takeProfitPricex,
+//         isfromModify,
+//       });
+//     }
+//   }, [location]);
+
+//   // Handle the modify order process
+//   const handleModifyOrder = async (
+//     updatedTakeProfitPrice,
+//     updatedStopLossPrice,
+//     orderData
+//   ) => {
+//     const payload = {
+//       orderId: orderData?.orderId || 0,
+//       orderQty: orderData?.orderQty || 0,
+//       orderType: orderData?.initialOrderType || "string",
+//       takeProfitOrderId: orderData?.takeProfitId || 0,
+//       takeProfitPrice: updatedTakeProfitPrice || 0, // Default to 0
+//       stopLossOrderId: orderData?.stopLossId || 0,
+//       stopLossPrice: updatedStopLossPrice || 0, // Default to 0
+//     };
+
+//     console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
+
+//     try {
+//       const response = await modifyOrder(payload);
+//       console.log("Order Modified:", response);
+//       toast.success("Order modified successfully");
+//     } catch (error) {
+//       toast.error("Error modifying order");
+//       console.error("Error modifying order:", error);
+//     }
+//   };
+//   // useEffect(() => {
+//   //   // Ensure location.state is present and has the expected values for modification
+//   //   if (location?.state?.stopLossPricez !== undefined && location?.state?.takeProfitPricex !== undefined) {
+//   //     // Destructure the relevant values from the location state
+//   //     const { stopLossPricez, takeProfitPricex } = location.state;
+
+//   //     // Update the chart lines with the received values
+//   //     const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+//   //     stopLossLine.current?.setData([{ time: currentTime, value: stopLossPricez }]);
+//   //     takeProfitLine.current?.setData([{ time: currentTime, value: takeProfitPricex }]);
+
+//   //     console.log("Chart lines updated with state values:", {
+//   //       stopLossPricez,
+//   //       takeProfitPricex,
+
+//   //     });
+//   //   }
+//   // }, [location.state]); // Dependency on location.state
+
+//   // Effect to initialize the chart with state values when the component mounts
+//   useEffect(() => {
+//     if (
+//       location?.state?.stopLossPricez !== undefined &&
+//       location?.state?.takeProfitPricex !== undefined
+//     ) {
+//       const { stopLossPricez, takeProfitPricex } = location.state;
+
+//       // Update the chart lines with the received values
+//       const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+
+//       stopLossLine.current?.setData([
+//         { time: currentTime, value: stopLossPricez },
+//       ]);
+//       takeProfitLine.current?.setData([
+//         { time: currentTime, value: takeProfitPricex },
+//       ]);
+
+//       setStopLossPrice(stopLossPricez);
+//       setTakeProfit(takeProfitPricex);
+
+//       console.log("Chart lines updated with state values:", {
+//         stopLossPricez,
+//         takeProfitPricex,
+//       });
+//     }
+//   }, [location.state]); // Dependency on location.state
+
+//   // Function to handle single click events
+//   const singleClickHandler = (e) => {
+//     if (!chartRef.current || !candlestickSeries.current) return;
+
+//     const chartBounds = chartRef.current.getBoundingClientRect();
+//     const yCoord = e.clientY - chartBounds.top;
+//     const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+//     const tolerance = 0.5; // Adjust based on user experience
+
+//     if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+
+//     // Check proximity to lines and initiate drag
+//     if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
+//       setDraggedLine("stop_loss");
+//       setIsDragging(true);
+//       highlightLine("stop_loss");
+//     } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
+//       setDraggedLine("take_profit");
+//       setIsDragging(true);
+//       highlightLine("take_profit");
+//     } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
+//       setDraggedLine("entry");
+//       setIsDragging(true);
+//       highlightLine("entry");
+//     }
+//   };
+
+//   // Function to highlight the selected line
+//   const highlightLine = (lineType) => {
+//     if (lineType === "stop_loss") {
+//       stopLossLine.current?.setOptions({ color: "red", lineWidth: 2 });
+//       takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//       entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//     } else if (lineType === "take_profit") {
+//       stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//       takeProfitLine.current?.setOptions({ color: "green", lineWidth: 2 });
+//       entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//     } else if (lineType === "entry") {
+//       stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//       takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+//       entryLine.current?.setOptions({ color: "blue", lineWidth: 2 });
+//     }
+//   };
+//   // Function to reset the line highlight after dragging ends
+//   //  const resetLineHighlight = () => {
+//   //   stopLossLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
+//   //   takeProfitLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
+//   //   entryLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
+//   // };
+//   // Mouse move handler for smoother drag updates
+//   const mouseMoveHandler = (e) => {
+//     if (!isDragging || !draggedLine || !chartRef.current) return;
+
+//     const chartBounds = chartRef.current.getBoundingClientRect();
+//     const yCoord = e.clientY - chartBounds.top;
+//     const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+
+//     if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+
+//     // Smooth updates for the dragged line
+//     if (draggedLine === "stop_loss") {
+//       setStopLossPrice(priceAtPoint);
+//       stopLossLine.current?.setData([
+//         { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+//       ]);
+//     } else if (draggedLine === "take_profit") {
+//       setTakeProfit(priceAtPoint);
+//       takeProfitLine.current?.setData([
+//         { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+//       ]);
+//     } else if (draggedLine === "entry") {
+//       setEntryPrice(priceAtPoint);
+//       entryLine.current?.setData([
+//         { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+//       ]);
+//     }
+//   };
+
+//   // Mouse up handler to end dragging
+//   const mouseUpHandler = () => {
+//     setIsDragging(false);
+//     setDraggedLine(null);
+
+//     if (stopLossPrice && takeProfit) {
+//       handleModifyOrder(stopLossPrice, takeProfit);
+//     }
+//   };
+
+//   // Add event listeners for smooth interaction
+//   useEffect(() => {
+//     const chartElement = chartRef.current;
+//     if (!chartElement) return;
+
+//     chartElement.addEventListener("mousemove", mouseMoveHandler);
+//     chartElement.addEventListener("mouseup", mouseUpHandler);
+
+//     return () => {
+//       chartElement.removeEventListener("mousemove", mouseMoveHandler);
+//       chartElement.removeEventListener("mouseup", mouseUpHandler);
+//     };
+//   }, [isDragging, draggedLine]);
 
 //   const handlePlaceOrder = async () => {
 //     const orderData = {
 //       symbol: "NQZ4",
-//       side: isBuyActive ? "BUY" : "SELL", // Update side based on the buy/sell toggle
+//       side: isBuyActive ? "Buy" : "Sell", // Update side based on the buy/sell toggle
 //       order_type: orderType,
 //       price: entryPrice, // Assuming you want to use entryPrice as the price
 //       quantity: Number(quantity), // Ensure quantity is a number
 //       take_profit: takeProfit, // Include take profit in the order data
-//       stop_loss_price: stopLossPrice, // Including stop loss in the order data
+//       stop_loss: stopLossPrice, // Including stop loss in the order data
 //     };
 
 //     console.log("Order Data Payload:", JSON.stringify(orderData, null, 2));
@@ -135,115 +435,114 @@
 //           "Something went wrong while processing your order. Please try again in a moment.",
 //       });
 //     }
-// };
+//   };
 
-//   useEffect(() => {
-//     const chart = createChart(chartRef.current, {
-//       layout: {
-//         textColor: "#333",
-//         background: { type: "solid", color: "#ffffff" },
-//       },
-//       grid: {
-//         horzLines: { color: "#efefef" },
-//         vertLines: { color: "#efefef" },
-//       },
-//       crossHair: { mode: 0 },
-//     });
+//   const chartInstance = useRef(null); // Reference for the chart instance
+//   const candlestickSeries = useRef(null); // Reference for the candlestick series
+//   const stopLossLine = useRef(null);
+//   const takeProfitLine = useRef(null);
+//   const entryLine = useRef(null);
 
-//     const candlestickSeries = chart.addCandlestickSeries({
-//       upColor: "#26a69a",
-//       downColor: "#ef5350",
-//       borderVisible: false,
-//       wickUpColor: "#26a69a",
-//       wickDownColor: "#ef5350",
-//     });
+//   const [initialTime, setInitialTime] = useState(Date.now() / 1000); // Just a placeholder time for the lines
+//   const [linesAdded, setLinesAdded] = useState(false); // New state to track if lines are added
 
-//     candlestickSeries.setData([
-//       {
-//         time: "2018-12-22",
-//         open: 75.16,
-//         high: 82.84,
-//         low: 36.16,
-//         close: 45.72,
-//       },
-//       { time: "2018-12-23", open: 45.12, high: 53.9, low: 45.12, close: 48.09 },
-
-//     ]);
-
-//     const stopLossLine = chart.addLineSeries({ color: "red", lineWidth: 2 });
-//     const takeProfitLine = chart.addLineSeries({
-//       color: "green",
-//       lineWidth: 2,
-//     });
-//     const entryLine = chart.addLineSeries({ color: "blue", lineWidth: 2 });
-
-//     const initialTime = "2018-12-22";
-
-//     if (arePricesVisible) {
-//       stopLossLine.setData([{ time: initialTime, value: stopLossPrice }]);
-//       takeProfitLine.setData([{ time: initialTime, value: takeProfit }]);
-//       entryLine.setData([{ time: initialTime, value: entryPrice }]);
+//   // Function to add or remove the horizontal lines
+//   const toggleLines = () => {
+//     if (linesAdded) {
+//       // If lines are added, remove them
+//       stopLossLine.current.setData([]);
+//       takeProfitLine.current.setData([]);
+//       entryLine.current.setData([]);
+//     } else {
+//       // If lines are not added, add them
+//       stopLossLine.current.setData([
+//         { time: initialTime, value: stopLossPrice },
+//       ]);
+//       takeProfitLine.current.setData([
+//         { time: initialTime, value: takeProfit },
+//       ]);
+//       entryLine.current.setData([{ time: initialTime, value: entryPrice }]);
 //     }
 
-//     const singleClickHandler = (e) => {
-//       const { offsetY } = e;
-//       const priceAtPoint = candlestickSeries.coordinateToPrice(offsetY);
-//       const tolerance = 3;
+//     // Toggle the linesAdded state
+//     setLinesAdded(!linesAdded);
+//   };
 
-//       if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
-//         setDraggedLine("stop_loss");
-//         setIsDragging(true);
-//       } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
-//         setDraggedLine("take_profit");
-//         setIsDragging(true);
-//       } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
-//         setDraggedLine("entry");
-//         setIsDragging(true);
-//       }
-//     };
+//   // // Handler for the single click to detect which line to drag
+//   // const singleClickHandler = (e) => {
+//   //   if (!chartInstance.current) return;
 
-//     const mouseMoveHandler = (e) => {
-//       if (isDragging) {
-//         const { offsetY } = e;
-//         const newPrice = candlestickSeries.coordinateToPrice(offsetY);
-//         switch (draggedLine) {
-//           case "stop_loss":
-//             setStopLossPrice(newPrice);
-//             stopLossLine.setData([{ time: initialTime, value: newPrice }]);
-//             break;
-//           case "take_profit":
-//             setTakeProfit(newPrice);
-//             takeProfitLine.setData([{ time: initialTime, value: newPrice }]);
-//             break;
-//           case "entry":
-//             setEntryPrice(newPrice);
-//             entryLine.setData([{ time: initialTime, value: newPrice }]);
-//             break;
-//           default:
-//             break;
-//         }
-//       }
-//     };
+//   //   const chartBounds = chartRef.current.getBoundingClientRect();
+//   //   const yCoord = e.clientY - chartBounds.top;
+//   //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+//   //   const tolerance = 0.5; // Adjust as needed for user experience
 
-//     const mouseUpHandler = () => {
-//       setIsDragging(false);
-//       setDraggedLine(null);
-//     };
+//   //   // Check proximity to the horizontal lines
+//   //   if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
+//   //     setDraggedLine("stop_loss");
+//   //     setIsDragging(true);
+//   //   } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
+//   //     setDraggedLine("take_profit");
+//   //     setIsDragging(true);
+//   //   } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
+//   //     setDraggedLine("entry");
+//   //     setIsDragging(true);
+//   //   }
+//   // };
 
-//     const chartElement = chartRef.current;
+//   // // Mouse move handler to update the price dynamically
+//   // const mouseMoveHandler = (e) => {
+//   //   if (!isDragging || !draggedLine || !chartInstance.current) return;
 
-//     chartElement.addEventListener("click", singleClickHandler);
-//     chartElement.addEventListener("mousemove", mouseMoveHandler);
-//     chartElement.addEventListener("mouseup", mouseUpHandler);
+//   //   const chartBounds = chartRef.current.getBoundingClientRect();
+//   //   const yCoord = e.clientY - chartBounds.top;
+//   //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
 
+//   //   // Update state based on which line is being dragged
+//   //   if (draggedLine === "stop_loss") {
+//   //     setStopLossPrice(priceAtPoint);
+//   //     stopLossLine.current.setData([
+//   //       { time: initialTime, value: priceAtPoint },
+//   //     ]);
+//   //   } else if (draggedLine === "take_profit") {
+//   //     setTakeProfit(priceAtPoint);
+//   //     takeProfitLine.current.setData([
+//   //       { time: initialTime, value: priceAtPoint },
+//   //     ]);
+//   //   } else if (draggedLine === "entry") {
+//   //     setEntryPrice(priceAtPoint);
+//   //     entryLine.current.setData([{ time: initialTime, value: priceAtPoint }]);
+//   //   }
+//   // };
+
+//   // // Mouse up handler to end dragging
+//   // const mouseUpHandler = () => {
+//   //   setIsDragging(false);
+//   //   setDraggedLine(null);
+//   // };
+
+//   useEffect(() => {
+//     // Add event listeners for mouse actions (dragging)
+//     const chartContainer = chartRef.current;
+
+//     chartContainer.addEventListener("mousedown", singleClickHandler);
+//     chartContainer.addEventListener("mousemove", mouseMoveHandler);
+//     chartContainer.addEventListener("mouseup", mouseUpHandler);
+
+//     // Cleanup event listeners on unmount
 //     return () => {
-//       chartElement.removeEventListener("click", singleClickHandler);
-//       chartElement.removeEventListener("mousemove", mouseMoveHandler);
-//       chartElement.removeEventListener("mouseup", mouseUpHandler);
-//       chart.remove();
+//       chartContainer.removeEventListener("mousedown", singleClickHandler);
+//       chartContainer.removeEventListener("mousemove", mouseMoveHandler);
+//       chartContainer.removeEventListener("mouseup", mouseUpHandler);
 //     };
-//   }, [entryPrice, stopLossPrice, takeProfit, quantity, isDragging, arePricesVisible]);
-
+//   }, [
+//     isDragging,
+//     draggedLine,
+//     initialTime,
+//     stopLossPrice,
+//     takeProfit,
+//     entryPrice,
+//   ]);
 //   return (
 //     <div className="relative p-0.5 w-full h-screen bg-gray-50 flex flex-col">
 //       <div className="flex flex-1 overflow-hidden">
@@ -252,13 +551,15 @@
 //           toggleCalculator={toggleCalculator}
 //         />
 
-//         <div className="flex-1 p-0.5 flex flex-row overflow-hidden space-x-1">
+//         <div className="flex-1 p-0.5 flex overflow-hidden">
+//           {/* Floating Price Settings Box */}
 //           {arePricesVisible && (
-//             <div className="flex flex-col space-y-4 p-1 bg-white border border-gray-100 rounded-lg shadow-md min-w-[180px] max-w-[200px]">
+//             <div className="absolute top-1/5 left-16 transform translate-x-2 w-[250px] pl-4 pr-4 py-3 bg-white border border-gray-100 rounded-lg shadow-lg z-10">
 //               <h2 className="text-2xl font-semibold text-gray-800">
 //                 Price Settings
 //               </h2>
-//               <div className="flex justify-between">
+
+//               <div className="flex justify-between space-x-2">
 //                 <button
 //                   className={`flex-1 py-2 rounded-lg mr-1 ${
 //                     isBuyActive ? "bg-green-600" : "bg-gray-200"
@@ -276,38 +577,38 @@
 //                   Sell
 //                 </button>
 //               </div>
-//               <div>
-//                 <div className="flex space-x-4">
-//                   <label className="flex items-center space-x-2">
-//                     <input
-//                       type="radio"
-//                       value="MKT"
-//                       checked={orderType === "MKT"}
-//                       onChange={() => setOrderType("MKT")}
-//                       className="form-radio h-4 w-4 text-blue-600"
-//                     />
-//                     <span className="text-gray-700">Market</span>
-//                   </label>
 
-//                   <label className="flex items-center space-x-2">
-//                     <input
-//                       type="radio"
-//                       value="LMT"
-//                       checked={orderType === "LMT"}
-//                       onChange={() => setOrderType("LMT")}
-//                       className="form-radio h-4 w-4 text-blue-600"
-//                     />
-//                     <span className="text-gray-700">Limit</span>
-//                   </label>
-//                 </div>
+//               <div className="flex space-x-4">
+//                 <label className="flex items-center space-x-2">
+//                   <input
+//                     type="radio"
+//                     value="MKT"
+//                     checked={orderType === "MKT"}
+//                     onChange={() => setOrderType("MKT")}
+//                     className="form-radio h-4 w-4 text-blue-600"
+//                   />
+//                   <span className="text-gray-700">Market</span>
+//                 </label>
+//                 <label className="flex items-center space-x-2">
+//                   <input
+//                     type="radio"
+//                     value="LMT"
+//                     checked={orderType === "LMT"}
+//                     onChange={() => setOrderType("LMT")}
+//                     className="form-radio h-4 w-4 text-blue-600"
+//                   />
+//                   <span className="text-gray-700">Limit</span>
+//                 </label>
 //               </div>
-
 //               <div>
 //                 <label className="block text-gray-700">Entry Price:</label>
 //                 <input
 //                   type="number"
-//                   value={entryPrice}
-//                   onChange={(e) => setEntryPrice(Number(e.target.value))}
+//                   step="0.01" // Ensures input step is 0.01 for two decimal places
+//                   value={entryPrice} // Formats the value to two decimals
+//                   onChange={(e) =>
+//                     setEntryPrice(parseFloat(Number(e.target.value).toFixed(2)))
+//                   }
 //                   className="mt-1 p-2 border rounded w-full"
 //                 />
 //               </div>
@@ -316,8 +617,13 @@
 //                 <label className="block text-gray-700">Stop Loss Price:</label>
 //                 <input
 //                   type="number"
-//                   value={stopLossPrice}
-//                   onChange={(e) => setStopLossPrice(Number(e.target.value))}
+//                   step="0.01" // Ensures input step is 0.01 for two decimal places
+//                   value={stopLossPrice} // Formats the value to two decimals
+//                   onChange={(e) =>
+//                     setStopLossPrice(
+//                       parseFloat(Number(e.target.value).toFixed(2))
+//                     )
+//                   }
 //                   className="mt-1 p-2 border rounded w-full"
 //                 />
 //               </div>
@@ -326,35 +632,64 @@
 //                 <label className="block text-gray-700">Take Profit:</label>
 //                 <input
 //                   type="number"
-//                   value={takeProfit}
-//                   onChange={(e) => setTakeProfit(Number(e.target.value))}
+//                   step="0.01" // Ensures input step is 0.01 for two decimal places
+//                   value={takeProfit} // Formats the value to two decimals
+//                   onChange={(e) =>
+//                     setTakeProfit(parseFloat(Number(e.target.value).toFixed(2)))
+//                   }
 //                   className="mt-1 p-2 border rounded w-full"
 //                 />
 //               </div>
 
 //               <div>
-//               <label className="block text-gray-700">Quantity:</label>
-//               <input
-//                 type="number"
-//                 value={quantity}
-//                 onChange={(e) => setQuantity(e.target.value)}
-//                 className="form-input w-full px-2 py-1 border rounded-lg focus:outline-none"
-//               />
-//             </div>
+//                 <label className="block text-gray-700">Quantity:</label>
+//                 <input
+//                   type="number"
+//                   value={quantity}
+//                   onChange={(e) => setQuantity(e.target.value)}
+//                   className="form-input w-full px-2 py-1 border rounded-lg focus:outline-none"
+//                 />
+//               </div>
 
 //               <button
 //                 onClick={handlePlaceOrder}
-//                 className="bg-blue-600 text-white p-2 rounded-lg font-semibold mt-4"
+//                 className="bg-blue-600 text-white p-2 rounded-lg font-semibold mt-4 w-full"
 //               >
 //                 Place Order
 //               </button>
+//               <div>
+//                 <button
+//                   onClick={() => {
+//                     toggleLines();
+//                     console.log(linesAdded ? "Removing lines" : "Adding lines");
+//                   }}
+//                 >
+//                   {linesAdded ? "Remove Lines" : "Add Lines"}
+//                 </button>
+
+//                 {/* Update Stop Loss Line Button */}
+//                 <button
+//                   onClick={() => {
+//                     stopLossLine.current.setData([
+//                       { time: initialTime, value: stopLossPrice },
+//                     ]);
+//                     console.log("Stop Loss Price:", stopLossPrice); // Log the Stop Loss price
+//                   }}
+//                 >
+//                   Update Stop Loss Line
+//                 </button>
+//               </div>
 //             </div>
 //           )}
 
+//           {/* Chart - Takes 80% of the width */}
 //           <div
 //             ref={chartRef}
 //             className="flex-1"
-//             style={{ height: "590px" }} // Example height
+//             style={{ height: "560px" }} // Example height for chart
+//             onMouseDown={singleClickHandler}
+//             onMouseMove={mouseMoveHandler}
+//             onMouseUp={mouseUpHandler}
 //           />
 //         </div>
 //       </div>
@@ -366,7 +701,9 @@
 
 // export default Dashboard;
 
+
 import React, { useEffect, useRef, useState } from "react";
+
 import { createChart } from "lightweight-charts";
 import Sidebar from "../../components/ui/Sidebar";
 import SearchTicker from "../../components/SearchTicker/SearchTicker";
@@ -377,90 +714,45 @@ import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { useLocation } from "react-router-dom";
+import { OrderTable } from "../OrderTable/OrderTable";
 import { modifyOrder } from "../../services/Order/Order";
+import { getTickerData } from "../../services/auth";
 
 function Dashboard() {
-  const [entryPrice, setEntryPrice] = useState();
-  const [stopLossPrice, setStopLossPrice] = useState();
-  const [takeProfit, setTakeProfit] = useState();
+  const [entryPrice, setEntryPrice] = useState(82);
+  const [stopLossPrice, setStopLossPrice] = useState(60);
+  const [takeProfit, setTakeProfit] = useState(89);
   const [isBuyActive, setIsBuyActive] = useState(true);
-  const [orderType, setOrderType] = useState("MKT");
+  const [orderType, setOrderType] = useState(" ");
   const chartRef = useRef(null);
   const [arePricesVisible, setArePricesVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedLine, setDraggedLine] = useState(null);
   const [showCalculator, setShowCalculator] = useState(false);
+
   const [quantity, setQuantity] = useState("");
-  const [isOrderModification, setIsOrderModification] = useState(false);
-  const [orders, setOrders] = useState([]);
+  const [arePricesVisibleModifiy, setarePricesVisibleModifiy] = useState(true);
 
   const navigate = useNavigate();
-
-  const location = useLocation();
-
-  const {
-    orderId,
-    takeProfit: initialTakeProfit,
-    stopPrice: initialStopPrice,
-  } = location.state || {};
-
-  useEffect(() => {
-    if (orderId) {
-      setIsOrderModification(true); // Indicate that this is a modification
-      setTakeProfit(initialTakeProfit || ""); // Set initial value for Take Profit
-      setStopLossPrice(initialStopPrice || ""); // Set initial value for Stop Loss
-      setArePricesVisible(false); // Hide price fields initially
-    }
-  }, [orderId, initialTakeProfit, initialStopPrice]);
-
-  // const handleUpdateTakeProfit = () => {
-
-  //   console.log(
-  //     "Updating:",
-  //     "takeProfit",
-  //      takeProfit,
-  //     "stopLossPrice",
-  //     stopLossPrice
-  //   );
-  //   setArePricesVisible(true);
-  //   setIsOrderModification(false); // Hide input fields after modification
-  //   navigate("/order-table");
-  // };
-
-  // api integration of modify order
-  const handleUpdateTakeProfit = async () => {
-    console.log("Updating take profit and stop loss:", {
-      takeProfit,
-      stopLossPrice,
-    });
-
-    // Prepare the payload for the modifyOrder API call
-    const orderData = {
-      
-        "orderId": 140224841386,
-        "orderQty": 1,
-        "orderType": "Limit",
-        "takeProfitOrderId": 140224841389,
-        "takeProfitPrice": 60,
-        "stopLossOrderId":  140224841398,
-        "stopLossPrice": 80
-       
-    };
-
-    try {
-      // Send the request to modify the order
-      const response = await modifyOrder(orderData);
-      alert("Order modified successfully:", response);
-
-      // Update UI state upon successful order modification
-      setArePricesVisible(true);
-      setIsOrderModification(false); // Hide input fields after modification
-      navigate("/order-table"); // Navigate to the order table
-    } catch (error) {
-      console.error("Failed to modify order:", error);
-      // Handle error feedback for the user, e.g., display a message or error state
-    }
+  const { state } = useLocation();
+  const clearInputs = () => {
+    setEntryPrice("");
+    setStopLossPrice("");
+    setTakeProfit("");
   };
+  
+
+  // State to store the received order data
+  const [orderData, setOrderData] = useState({
+    orderId: 0,
+    initialOrderType: '',
+    orderQty: 0,
+    stopLossId: '',
+    stopLossPricez: 0,
+    takeProfitId: '',
+    takeProfitPricex: 0,
+    isfromModify: false,
+  });
 
   const togglePriceBoxes = () => {
     setArePricesVisible((prev) => !prev);
@@ -475,19 +767,359 @@ function Dashboard() {
     setShowCalculator((prev) => !prev);
     setArePricesVisible(false);
   };
+  const location = useLocation(); // Access the location state directly
+
+  useEffect(() => {
+    // Initialize the chart instance
+    chartInstance.current = createChart(chartRef.current, {
+      layout: {
+        textColor: "#333",
+        background: { type: "solid", color: "#ffffff" },
+      },
+      grid: {
+        horzLines: { color: "#efefef" },
+        vertLines: { color: "#efefef" },
+      },
+      crossHair: { mode: 0 },
+    });
+
+    // Add candlestick series to the chart
+    candlestickSeries.current = chartInstance.current.addCandlestickSeries({
+      upColor: "#26a69a",
+      downColor: "#ef5350",
+      borderVisible: false,
+      wickUpColor: "#26a69a",
+      wickDownColor: "#ef5350",
+    });
+
+    // Function to fetch and process ticker data
+    const fetchData = async () => {
+      try {
+        const apiData = await getTickerData("NQ=F", "2020-01-01", "2024-12-04");
+        console.log("Fetched API data:", apiData); // Debugging line
+
+        // Process the fetched data into the format required by the chart
+        const chartData = apiData
+          .map((item) => ({
+            time: new Date(item.index).getTime() / 1000, // Convert date to Unix timestamp (seconds)
+            open: item.open,
+            high: item.high,
+            low: item.low,
+            close: item.close,
+          }))
+          .filter(
+            (data) =>
+              data.time && data.open && data.high && data.low && data.close
+          )
+          .sort((a, b) => a.time - b.time); // Sort by time in ascending order
+
+        console.log("Formatted chart data:", chartData); // Debugging line
+
+        // Update the chart with the processed data
+        candlestickSeries.current.setData(chartData);
+      } catch (error) {
+        console.error("Error fetching ticker data:", error);
+      }
+    };
+
+    // Call fetchData when the component mounts
+    fetchData();
+
+    // Initialize horizontal lines for Stop Loss, Take Profit, and Entry
+    stopLossLine.current = chartInstance.current.addLineSeries({
+      color: "red",
+      lineWidth: 2, // Solid line width
+      crosshairMarkerVisible: false,
+      lineStyle: 0, // Solid line
+    });
+
+    takeProfitLine.current = chartInstance.current.addLineSeries({
+      color: "green",
+      lineWidth: 2, // Solid line width
+      crosshairMarkerVisible: false,
+      lineStyle: 0, // Solid line
+    });
+
+    entryLine.current = chartInstance.current.addLineSeries({
+      color: "blue",
+      lineWidth: 2, // Solid line width
+      crosshairMarkerVisible: false,
+      lineStyle: 0, // Solid line
+    });
+
+    // Cleanup function to remove the chart instance when the component unmounts
+    return () => {
+      chartInstance.current.remove();
+    };
+  }, []); // Empty dependency array ensures this effect runs only once
+// Update the state with received location data
+useEffect(() => {
+  if (location.state) {
+    const {
+      orderId,
+      initialOrderType,
+      orderQty,
+      stopLossId,
+      stopLossPricez,
+      takeProfitId,
+      takeProfitPricex,
+      isfromModify,
+    } = location.state;
+
+    console.log("Received State:", {
+      orderId,
+      initialOrderType,
+      orderQty,
+      stopLossId,
+      stopLossPricez,
+      takeProfitId,
+      takeProfitPricex,
+      isfromModify,
+    });
+
+    // Update the local state with received data
+    setOrderData({
+      orderId,
+      initialOrderType,
+      orderQty,
+      stopLossId,
+      stopLossPricez,
+      takeProfitId,
+      takeProfitPricex,
+      isfromModify,
+    });
+  }
+}, [location]);
+
+// Handle the modify order process
+const handleModifyOrder = async (updatedTakeProfitPrice, updatedStopLossPrice) => {
+  // Construct the payload dynamically using orderData
+  const payload = {
+    orderId: orderData?.orderId || 0,
+    orderQty: orderData?.orderQty || 0,
+    orderType: orderData?.initialOrderType || "string",
+    takeProfitOrderId: orderData?.takeProfitId || 0,
+    takeProfitPrice: updatedTakeProfitPrice || 0,
+    stopLossOrderId: orderData?.stopLossId || 0,
+    stopLossPrice: updatedStopLossPrice || 0,
+  };
+
+  console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
+
+  try {
+    const response = await modifyOrder(payload); // Assuming modifyOrder is your API function
+    console.log("Order Modified:", response);
+    toast.success("Order modified successfully");
+  } catch (error) {
+    toast.error("Error modifying order");
+    console.error("Error modifying order:", error);
+  }
+};
+
+  // Handle the state when the location changes
+  // useEffect(() => {
+  //   if (location.state) {
+  //     const {
+  //       orderId,
+  //       initialOrderType,
+  //       orderQty,
+  //       stopLossId,
+  //       stopLossPricez,
+  //       takeProfitId,
+  //       takeProfitPricex,
+  //       isfromModify,
+  //     } = location.state;
+
+  //     console.log("Received State:", {
+  //       orderId,
+  //       initialOrderType,
+  //       orderQty,
+  //       stopLossId,
+  //       stopLossPricez,
+  //       takeProfitId,
+  //       takeProfitPricex,
+  //       isfromModify,
+  //     });
+  //   }
+  // }, [location]);
+
+  // // Handle the modify order process
+  // const handleModifyOrder = async (
+  //   updatedTakeProfitPrice,
+  //   updatedStopLossPrice,
+  //   orderData
+  // ) => {
+  //   const payload = {
+  //     orderId: orderData?.orderId || 0,
+  //     orderQty: orderData?.orderQty || 0,
+  //     orderType: orderData?.initialOrderType || "string",
+  //     takeProfitOrderId: orderData?.takeProfitId || 0,
+  //     takeProfitPrice: updatedTakeProfitPrice || 0, // Default to 0
+  //     stopLossOrderId: orderData?.stopLossId || 0,
+  //     stopLossPrice: updatedStopLossPrice || 0, // Default to 0
+  //   };
+
+  //   console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
+
+  //   try {
+  //     const response = await modifyOrder(payload);
+  //     console.log("Order Modified:", response);
+  //     toast.success("Order modified successfully");
+  //   } catch (error) {
+  //     toast.error("Error modifying order");
+  //     console.error("Error modifying order:", error);
+  //   }
+  // };
+
+
+
+
+  // useEffect(() => {
+  //   // Ensure location.state is present and has the expected values for modification
+  //   if (location?.state?.stopLossPricez !== undefined && location?.state?.takeProfitPricex !== undefined) {
+  //     // Destructure the relevant values from the location state
+  //     const { stopLossPricez, takeProfitPricex } = location.state;
+
+  //     // Update the chart lines with the received values
+  //     const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+  //     stopLossLine.current?.setData([{ time: currentTime, value: stopLossPricez }]);
+  //     takeProfitLine.current?.setData([{ time: currentTime, value: takeProfitPricex }]);
+
+  //     console.log("Chart lines updated with state values:", {
+  //       stopLossPricez,
+  //       takeProfitPricex,
+
+  //     });
+  //   }
+  // }, [location.state]); // Dependency on location.state
+
+  // Effect to initialize the chart with state values when the component mounts
+  useEffect(() => {
+    if (
+      location?.state?.stopLossPricez !== undefined &&
+      location?.state?.takeProfitPricex !== undefined
+    ) {
+      const { stopLossPricez, takeProfitPricex } = location.state;
+
+      // Update the chart lines with the received values
+      const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+
+      stopLossLine.current?.setData([
+        { time: currentTime, value: stopLossPricez },
+      ]);
+      takeProfitLine.current?.setData([
+        { time: currentTime, value: takeProfitPricex },
+      ]);
+
+      setStopLossPrice(stopLossPricez);
+      setTakeProfit(takeProfitPricex);
+
+      console.log("Chart lines updated with state values:", {
+        stopLossPricez,
+        takeProfitPricex,
+      });
+    }
+  }, [location.state]); // Dependency on location.state
+
+// Function to handle single click events
+const singleClickHandler = (e) => {
+  if (!chartRef.current || !candlestickSeries.current) return;
+
+  const chartBounds = chartRef.current.getBoundingClientRect();
+  const yCoord = e.clientY - chartBounds.top;
+  const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+
+  if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+
+  // Allow unrestricted selection of lines
+  if (draggedLine === null) {
+    setDraggedLine("stop_loss"); // Default to stop loss
+    setIsDragging(true);
+    highlightLine("stop_loss");
+  }
+};
+
+// Function to highlight the selected line
+const highlightLine = (lineType) => {
+  if (lineType === "stop_loss") {
+    stopLossLine.current?.setOptions({ color: "red", lineWidth: 2 });
+    takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+    entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+  } else if (lineType === "take_profit") {
+    stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+    takeProfitLine.current?.setOptions({ color: "green", lineWidth: 2 });
+    entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+  } else if (lineType === "entry") {
+    stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+    takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
+    entryLine.current?.setOptions({ color: "blue", lineWidth: 2 });
+  }
+};
+
+// Mouse move handler for smoother drag updates
+const mouseMoveHandler = (e) => {
+  if (!isDragging || !draggedLine || !chartRef.current) return;
+
+  const chartBounds = chartRef.current.getBoundingClientRect();
+  const yCoord = e.clientY - chartBounds.top;
+  const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+
+  if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+
+  // Smooth updates for the dragged line
+  if (draggedLine === "stop_loss") {
+    setStopLossPrice(priceAtPoint);
+    stopLossLine.current?.setData([
+      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+    ]);
+  } else if (draggedLine === "take_profit") {
+    setTakeProfit(priceAtPoint);
+    takeProfitLine.current?.setData([
+      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+    ]);
+  } else if (draggedLine === "entry") {
+    setEntryPrice(priceAtPoint);
+    entryLine.current?.setData([
+      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+    ]);
+  }
+};
+
+// Mouse up handler to end dragging
+const mouseUpHandler = () => {
+  setIsDragging(false);
+  setDraggedLine(null);
+
+  if (stopLossPrice && takeProfit) {
+    handleModifyOrder(stopLossPrice, takeProfit);
+  }
+};
+
+
+  // Add event listeners for smooth interaction
+  useEffect(() => {
+    const chartElement = chartRef.current;
+    if (!chartElement) return;
+
+    chartElement.addEventListener("mousemove", mouseMoveHandler);
+    chartElement.addEventListener("mouseup", mouseUpHandler);
+
+    return () => {
+      chartElement.removeEventListener("mousemove", mouseMoveHandler);
+      chartElement.removeEventListener("mouseup", mouseUpHandler);
+    };
+  }, [isDragging, draggedLine]);
 
   const handlePlaceOrder = async () => {
     const orderData = {
       symbol: "NQZ4",
-      side: isBuyActive ? "Buy" : "Sell",  
+      side: isBuyActive ? "Buy" : "Sell", // Update side based on the buy/sell toggle
       order_type: orderType,
-      price: entryPrice, //  
+      price: entryPrice, // Assuming you want to use entryPrice as the price
       quantity: Number(quantity), // Ensure quantity is a number
       take_profit: takeProfit, // Include take profit in the order data
       stop_loss: stopLossPrice, // Including stop loss in the order data
     };
-
-    // setOrders((prevOrders) => [...prevOrders, orderData]);
 
     console.log("Order Data Payload:", JSON.stringify(orderData, null, 2));
 
@@ -575,143 +1207,112 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    const chart = createChart(chartRef.current, {
-      layout: {
-        textColor: "#333",
-        background: { type: "solid", color: "#ffffff" },
-      },
-      grid: {
-        horzLines: { color: "#efefef" },
-        vertLines: { color: "#efefef" },
-      },
-      crossHair: { mode: 0 },
-    });
+  const chartInstance = useRef(null); // Reference for the chart instance
+  const candlestickSeries = useRef(null); // Reference for the candlestick series
+  const stopLossLine = useRef(null);
+  const takeProfitLine = useRef(null);
+  const entryLine = useRef(null);
 
-    const candlestickSeries = chart.addCandlestickSeries({
-      upColor: "#26a69a",
-      downColor: "#ef5350",
-      borderVisible: false,
-      wickUpColor: "#26a69a",
-      wickDownColor: "#ef5350",
-    });
+  const [initialTime, setInitialTime] = useState(Date.now() / 1000); // Just a placeholder time for the lines
+  const [linesAdded, setLinesAdded] = useState(false); // New state to track if lines are added
 
-    const data = [
-      {
-        time: "2018-12-22",
-        open: 75.16,
-        high: 82.84,
-        low: 36.16,
-        close: 45.72,
-      },
-      {
-        time: "2018-12-23",
-        open: "45.12", // <-- Ensure this is a number, not a string
-        high: 53.9,
-        low: "45.12", // <-- Ensure this is a number, not a string
-        close: "48.09", // <-- Ensure this is a number, not a string
-      },
-    ];
-
-    console.log(data); // Log data to check types of values
-
-    // Ensure that all values are numbers
-    candlestickSeries.setData(
-      data.map((item) => ({
-        ...item,
-        open: Number(item.open),
-        high: Number(item.high),
-        low: Number(item.low),
-        close: Number(item.close),
-      }))
-    );
-
-    const stopLossLine = chart.addLineSeries({ color: "red", lineWidth: 2 });
-    const takeProfitLine = chart.addLineSeries({
-      color: "green",
-      lineWidth: 2,
-    });
-    const entryLine = chart.addLineSeries({ color: "blue", lineWidth: 2 });
-
-    const initialTime = "2018-12-22";
-
-    if (arePricesVisible) {
-      // Ensure values are numbers before passing them to the chart
-      stopLossLine.setData([
-        { time: initialTime, value: Number(stopLossPrice) },
+  // Function to add or remove the horizontal lines
+  const toggleLines = () => {
+    if (linesAdded) {
+      // If lines are added, remove them
+      stopLossLine.current.setData([]);
+      takeProfitLine.current.setData([]);
+      entryLine.current.setData([]);
+    } else {
+      // If lines are not added, add them
+      stopLossLine.current.setData([
+        { time: initialTime, value: stopLossPrice },
       ]);
-      takeProfitLine.setData([
-        { time: initialTime, value: Number(takeProfit) },
+      takeProfitLine.current.setData([
+        { time: initialTime, value: takeProfit },
       ]);
-      entryLine.setData([{ time: initialTime, value: Number(entryPrice) }]);
+      entryLine.current.setData([{ time: initialTime, value: entryPrice }]);
     }
 
-    const singleClickHandler = (e) => {
-      const { offsetY } = e;
-      const priceAtPoint = candlestickSeries.coordinateToPrice(offsetY);
-      const tolerance = 3;
+    // Toggle the linesAdded state
+    setLinesAdded(!linesAdded);
+  };
 
-      if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
-        setDraggedLine("stop_loss");
-        setIsDragging(true);
-      } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
-        setDraggedLine("take_profit");
-        setIsDragging(true);
-      } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
-        setDraggedLine("entry");
-        setIsDragging(true);
-      }
-    };
+  // // Handler for the single click to detect which line to drag
+  // const singleClickHandler = (e) => {
+  //   if (!chartInstance.current) return;
 
-    const mouseMoveHandler = (e) => {
-      if (isDragging) {
-        const { offsetY } = e;
-        const newPrice = candlestickSeries.coordinateToPrice(offsetY);
-        switch (draggedLine) {
-          case "stop_loss":
-            setStopLossPrice(newPrice);
-            stopLossLine.setData([{ time: initialTime, value: newPrice }]);
-            break;
-          case "take_profit":
-            setTakeProfit(newPrice);
-            takeProfitLine.setData([{ time: initialTime, value: newPrice }]);
-            break;
-          case "entry":
-            setEntryPrice(newPrice);
-            entryLine.setData([{ time: initialTime, value: newPrice }]);
-            break;
-          default:
-            break;
-        }
-      }
-    };
+  //   const chartBounds = chartRef.current.getBoundingClientRect();
+  //   const yCoord = e.clientY - chartBounds.top;
+  //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+  //   const tolerance = 0.5; // Adjust as needed for user experience
 
-    const mouseUpHandler = () => {
-      setIsDragging(false);
-      setDraggedLine(null);
-    };
+  //   // Check proximity to the horizontal lines
+  //   if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
+  //     setDraggedLine("stop_loss");
+  //     setIsDragging(true);
+  //   } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
+  //     setDraggedLine("take_profit");
+  //     setIsDragging(true);
+  //   } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
+  //     setDraggedLine("entry");
+  //     setIsDragging(true);
+  //   }
+  // };
 
-    const chartElement = chartRef.current;
+  // // Mouse move handler to update the price dynamically
+  // const mouseMoveHandler = (e) => {
+  //   if (!isDragging || !draggedLine || !chartInstance.current) return;
 
-    chartElement.addEventListener("click", singleClickHandler);
-    chartElement.addEventListener("mousemove", mouseMoveHandler);
-    chartElement.addEventListener("mouseup", mouseUpHandler);
+  //   const chartBounds = chartRef.current.getBoundingClientRect();
+  //   const yCoord = e.clientY - chartBounds.top;
+  //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
 
+  //   // Update state based on which line is being dragged
+  //   if (draggedLine === "stop_loss") {
+  //     setStopLossPrice(priceAtPoint);
+  //     stopLossLine.current.setData([
+  //       { time: initialTime, value: priceAtPoint },
+  //     ]);
+  //   } else if (draggedLine === "take_profit") {
+  //     setTakeProfit(priceAtPoint);
+  //     takeProfitLine.current.setData([
+  //       { time: initialTime, value: priceAtPoint },
+  //     ]);
+  //   } else if (draggedLine === "entry") {
+  //     setEntryPrice(priceAtPoint);
+  //     entryLine.current.setData([{ time: initialTime, value: priceAtPoint }]);
+  //   }
+  // };
+
+  // // Mouse up handler to end dragging
+  // const mouseUpHandler = () => {
+  //   setIsDragging(false);
+  //   setDraggedLine(null);
+  // };
+
+  useEffect(() => {
+    // Add event listeners for mouse actions (dragging)
+    const chartContainer = chartRef.current;
+
+    chartContainer.addEventListener("mousedown", singleClickHandler);
+    chartContainer.addEventListener("mousemove", mouseMoveHandler);
+    chartContainer.addEventListener("mouseup", mouseUpHandler);
+
+    // Cleanup event listeners on unmount
     return () => {
-      chartElement.removeEventListener("click", singleClickHandler);
-      chartElement.removeEventListener("mousemove", mouseMoveHandler);
-      chartElement.removeEventListener("mouseup", mouseUpHandler);
-      chart.remove();
+      chartContainer.removeEventListener("mousedown", singleClickHandler);
+      chartContainer.removeEventListener("mousemove", mouseMoveHandler);
+      chartContainer.removeEventListener("mouseup", mouseUpHandler);
     };
   }, [
-    entryPrice,
+    isDragging,
+    draggedLine,
+    initialTime,
     stopLossPrice,
     takeProfit,
-    quantity,
-    isDragging,
-    arePricesVisible,
+    entryPrice,
   ]);
-
   return (
     <div className="relative p-0.5 w-full h-screen bg-gray-50 flex flex-col">
       <div className="flex flex-1 overflow-hidden">
@@ -720,68 +1321,15 @@ function Dashboard() {
           toggleCalculator={toggleCalculator}
         />
 
-        {/* Order Modification Popup */}
-        {isOrderModification && (
-          <div className="absolute top-1 left-1/2 transform -translate-x-1/2 p-6 bg-white rounded-xl shadow-lg max-w-sm w-full z-10">
-            <h2 className="text-lg font-semibold text-gray-900 text-center mb-4">
-              Modifying Order ID: {orderId}
-            </h2>
-
-            {/* Flex container for two input boxes in one row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Take Profit */}
-              <div className="flex flex-col">
-                <label className="text-gray-700 text-xs font-medium mb-2">
-                  Take Profit
-                </label>
-                <input
-                  type="number"
-                  value={40}
-                  onChange={(e) => setTakeProfit(Number(e.target.value))}
-                  className="p-3 border border-gray-300 rounded-md text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 transition-all"
-                />
-              </div>
-
-              {/* Stop Loss Price */}
-              <div className="flex flex-col">
-                <label className="text-gray-700 text-xs font-medium mb-2">
-                  Stop Loss Price
-                </label>
-                <input
-                  type="number"
-                  value={40}
-                  onChange={(e) => setStopLossPrice(Number(e.target.value))}
-                  className="p-3 border border-gray-300 rounded-md text-sm w-full focus:outline-none focus:ring-2 focus:ring-red-500 bg-gray-50 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Buttons in the flex container for Cancel and Update Order buttons */}
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() => setIsOrderModification(false)}
-                className="bg-gray-100 text-gray-700 px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdateTakeProfit}
-                className="bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                Update Order
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="flex-1 p-0.5 flex flex-row overflow-hidden space-x-1">
+        <div className="flex-1 p-0.5 flex overflow-hidden">
+          {/* Floating Price Settings Box */}
           {arePricesVisible && (
-            <div className="flex flex-col space-y-4 p-4 bg-white border border-gray-100 rounded-lg shadow-md min-w-[200px] max-w-[250px]">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+            <div className="absolute top-1/5 left-16 transform translate-x-2 w-[250px] pl-4 pr-4 py-3 bg-white border border-gray-100 rounded-lg shadow-lg z-10">
+              <h2 className="text-2xl font-semibold text-gray-800">
                 Price Settings
               </h2>
 
-              <div className="flex justify-between mb-3">
+              <div className="flex justify-between space-x-2">
                 <button
                   className={`flex-1 py-2 rounded-lg mr-1 ${
                     isBuyActive ? "bg-green-600" : "bg-gray-200"
@@ -800,71 +1348,76 @@ function Dashboard() {
                 </button>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Order Type:</label>
-                <div className="flex space-x-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      value="Market"
-                      checked={orderType === "Market"}
-                      onChange={() => setOrderType("Market")}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <span className="text-gray-700">Market</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      value="Limit"
-                      checked={orderType === "Limit"}
-                      onChange={() => setOrderType("Limit")}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <span className="text-gray-700">Limit</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Entry Price:</label>
-                <input
-                  type="number"
-                  value={entryPrice}
-                  onChange={(e) => setEntryPrice(Number(e.target.value))}
-                  className="p-2 border rounded w-full"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-1">
-                  Stop Loss Price:
+              <div className="flex space-x-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="MKT"
+                    checked={orderType === "MKT"}
+                    onChange={() => setOrderType("MKT")}
+                    className="form-radio h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-gray-700">Market</span>
                 </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    value="LMT"
+                    checked={orderType === "LMT"}
+                    onChange={() => setOrderType("LMT")}
+                    className="form-radio h-4 w-4 text-blue-600"
+                  />
+                  <span className="text-gray-700">Limit</span>
+                </label>
+              </div>
+              <div>
+                <label className="block text-gray-700">Entry Price:</label>
                 <input
                   type="number"
-                  value={stopLossPrice}
-                  onChange={(e) => setStopLossPrice(Number(e.target.value))}
-                  className="p-2 border rounded w-full"
+                  step="0.01" // Ensures input step is 0.01 for two decimal places
+                  value={entryPrice} // Formats the value to two decimals
+                  onChange={(e) =>
+                    setEntryPrice(parseFloat(Number(e.target.value).toFixed(2)))
+                  }
+                  className="mt-1 p-2 border rounded w-full"
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Take Profit:</label>
+              <div>
+                <label className="block text-gray-700">Stop Loss Price:</label>
                 <input
                   type="number"
-                  value={takeProfit}
-                  onChange={(e) => setTakeProfit(Number(e.target.value))}
-                  className="p-2 border rounded w-full"
+                  step="0.01" // Ensures input step is 0.01 for two decimal places
+                  value={stopLossPrice} // Formats the value to two decimals
+                  onChange={(e) =>
+                    setStopLossPrice(
+                      parseFloat(Number(e.target.value).toFixed(2))
+                    )
+                  }
+                  className="mt-1 p-2 border rounded w-full"
                 />
               </div>
 
-              <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Quantity:</label>
+              <div>
+                <label className="block text-gray-700">Take Profit:</label>
+                <input
+                  type="number"
+                  step="0.01" // Ensures input step is 0.01 for two decimal places
+                  value={takeProfit} // Formats the value to two decimals
+                  onChange={(e) =>
+                    setTakeProfit(parseFloat(Number(e.target.value).toFixed(2)))
+                  }
+                  className="mt-1 p-2 border rounded w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700">Quantity:</label>
                 <input
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="p-2 border rounded w-full"
+                  className="form-input w-full px-2 py-1 border rounded-lg focus:outline-none"
                 />
               </div>
 
@@ -874,10 +1427,40 @@ function Dashboard() {
               >
                 Place Order
               </button>
+              <div>
+                <button
+                  onClick={() => {
+                    toggleLines();
+                    console.log(linesAdded ? "Removing lines" : "Adding lines");
+                  }}
+                >
+                  {linesAdded ? "Remove Lines" : "Add Lines"}
+                </button>
+
+                {/* Update Stop Loss Line Button */}
+                <button
+                  onClick={() => {
+                    stopLossLine.current.setData([
+                      { time: initialTime, value: stopLossPrice },
+                    ]);
+                    console.log("Stop Loss Price:", stopLossPrice); // Log the Stop Loss price
+                  }}
+                >
+                  Update Stop Loss Line
+                </button>
+              </div>
             </div>
           )}
 
-          <div ref={chartRef} className="flex-1" style={{ height: "590px" }} />
+          {/* Chart - Takes 80% of the width */}
+          <div
+            ref={chartRef}
+            className="flex-1"
+            style={{ height: "560px" }} // Example height for chart
+            onMouseDown={singleClickHandler}
+            onMouseMove={mouseMoveHandler}
+            onMouseUp={mouseUpHandler}
+          />
         </div>
       </div>
 
