@@ -2,6 +2,7 @@
 
 // import { createChart } from "lightweight-charts";
 // import Sidebar from "../../components/ui/Sidebar";
+// // import SearchSymbol from "../../components/SearchTicker/SearchTicker";
 // import SearchTicker from "../../components/SearchTicker/SearchTicker";
 // import { placeOrder } from "../../services/Order/Order";
 // import { useNavigate } from "react-router-dom";
@@ -28,6 +29,12 @@
 
 //   const [quantity, setQuantity] = useState("");
 //   const [arePricesVisibleModifiy, setarePricesVisibleModifiy] = useState(true);
+//   const [capturedSymbol, setCapturedSymbol] = useState("NQ=F");
+
+//   const handleSymbolChange = (symbol) => {
+//     setCapturedSymbol(symbol); // Update state with the new symbol
+//     console.log("Captured Symbol:", symbol); // Log the captured symbol
+//   };
 
 //   const navigate = useNavigate();
 //   const { state } = useLocation();
@@ -36,6 +43,19 @@
 //     setStopLossPrice("");
 //     setTakeProfit("");
 //   };
+
+//   // State to store the received order data
+//   const [orderData, setOrderData] = useState({
+//     orderId: 0,
+//     initialOrderType: "",
+//     orderQty: 0,
+//     entry_price: "",
+//     stopLossId: "",
+//     stopLossPricez: 0,
+//     takeProfitId: "",
+//     takeProfitPricex: 0,
+//     isfromModify: false,
+//   });
 
 //   const togglePriceBoxes = () => {
 //     setArePricesVisible((prev) => !prev);
@@ -66,7 +86,6 @@
 //       crossHair: { mode: 0 },
 //     });
 
-//     // Add candlestick series to the chart
 //     candlestickSeries.current = chartInstance.current.addCandlestickSeries({
 //       upColor: "#26a69a",
 //       downColor: "#ef5350",
@@ -75,16 +94,47 @@
 //       wickDownColor: "#ef5350",
 //     });
 
+//     stopLossLine.current = chartInstance.current.addLineSeries({
+//       color: "red",
+//       lineWidth: 2,
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0,
+//     });
+
+//     takeProfitLine.current = chartInstance.current.addLineSeries({
+//       color: "green",
+//       lineWidth: 2,
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0,
+//     });
+
+//     entryLine.current = chartInstance.current.addLineSeries({
+//       color: "blue",
+//       lineWidth: 2,
+//       crosshairMarkerVisible: false,
+//       lineStyle: 0,
+//     });
+
+//     return () => {
+//       chartInstance.current.remove();
+//     };
+//   }, []);
+
+//   useEffect(() => {
 //     // Function to fetch and process ticker data
 //     const fetchData = async () => {
+//       if (!capturedSymbol) return; // Avoid fetching if no symbol is set
 //       try {
-//         const apiData = await getTickerData("TCS", "2020-01-01", "2024-12-31");
-//         console.log("Fetched API data:", apiData); // Debugging line
+//         const apiData = await getTickerData(
+//           capturedSymbol,
+//           "2010-01-01",
+//           "2024-12-31"
+//         );
+//         console.log("Fetched API data:", apiData);
 
-//         // Process the fetched data into the format required by the chart
 //         const chartData = apiData
 //           .map((item) => ({
-//             time: new Date(item.index).getTime() / 1000, // Convert date to Unix timestamp (seconds)
+//             time: new Date(item.index).getTime() / 1000, // Convert to Unix timestamp (seconds)
 //             open: item.open,
 //             high: item.high,
 //             low: item.low,
@@ -94,56 +144,25 @@
 //             (data) =>
 //               data.time && data.open && data.high && data.low && data.close
 //           )
-//           .sort((a, b) => a.time - b.time); // Sort by time in ascending order
+//           .sort((a, b) => a.time - b.time);
 
-//         console.log("Formatted chart data:", chartData); // Debugging line
-
-//         // Update the chart with the processed data
+//         console.log("Formatted chart data:", chartData);
 //         candlestickSeries.current.setData(chartData);
 //       } catch (error) {
 //         console.error("Error fetching ticker data:", error);
 //       }
 //     };
 
-//     // Call fetchData when the component mounts
-//     fetchData();
+//     fetchData(); // Call fetchData when the capturedSymbol changes
+//   }, [capturedSymbol]);
 
-//     // Initialize horizontal lines for Stop Loss, Take Profit, and Entry
-//     stopLossLine.current = chartInstance.current.addLineSeries({
-//       color: "red",
-//       lineWidth: 2, // Solid line width
-//       crosshairMarkerVisible: false,
-//       lineStyle: 0, // Solid line
-//     });
-
-//     takeProfitLine.current = chartInstance.current.addLineSeries({
-//       color: "green",
-//       lineWidth: 2, // Solid line width
-//       crosshairMarkerVisible: false,
-//       lineStyle: 0, // Solid line
-//     });
-
-//     entryLine.current = chartInstance.current.addLineSeries({
-//       color: "blue",
-//       lineWidth: 2, // Solid line width
-//       crosshairMarkerVisible: false,
-//       lineStyle: 0, // Solid line
-//     });
-
-//     // Cleanup function to remove the chart instance when the component unmounts
-//     return () => {
-//       chartInstance.current.remove();
-//     };
-//   }, []); // Empty dependency array ensures this effect runs only once
-
-  
-//   // Handle the state when the location changes
 //   useEffect(() => {
 //     if (location.state) {
 //       const {
 //         orderId,
 //         initialOrderType,
 //         orderQty,
+//         entry_price,
 //         stopLossId,
 //         stopLossPricez,
 //         takeProfitId,
@@ -152,6 +171,19 @@
 //       } = location.state;
 
 //       console.log("Received State:", {
+//         orderId,
+//         initialOrderType,
+//         orderQty,
+//         entry_price,
+//         stopLossId,
+//         stopLossPricez,
+//         takeProfitId,
+//         takeProfitPricex,
+//         isfromModify,
+//       });
+
+//       // Update the local state with received data
+//       setOrderData({
 //         orderId,
 //         initialOrderType,
 //         orderQty,
@@ -168,22 +200,24 @@
 //   const handleModifyOrder = async (
 //     updatedTakeProfitPrice,
 //     updatedStopLossPrice,
-//     orderData
+//     updatedEntryPrice
 //   ) => {
+//     // Construct the payload dynamically using orderData
 //     const payload = {
 //       orderId: orderData?.orderId || 0,
 //       orderQty: orderData?.orderQty || 0,
 //       orderType: orderData?.initialOrderType || "string",
+//       entry_price: updatedEntryPrice || 0,
 //       takeProfitOrderId: orderData?.takeProfitId || 0,
-//       takeProfitPrice: updatedTakeProfitPrice || 0, // Default to 0
+//       takeProfitPrice: updatedTakeProfitPrice || 0,
 //       stopLossOrderId: orderData?.stopLossId || 0,
-//       stopLossPrice: updatedStopLossPrice || 0, // Default to 0
+//       stopLossPrice: updatedStopLossPrice || 0,
 //     };
 
 //     console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
 
 //     try {
-//       const response = await modifyOrder(payload);
+//       const response = await modifyOrder(payload); // Assuming modifyOrder is your API function
 //       console.log("Order Modified:", response);
 //       toast.success("Order modified successfully");
 //     } catch (error) {
@@ -191,32 +225,15 @@
 //       console.error("Error modifying order:", error);
 //     }
 //   };
-//   // useEffect(() => {
-//   //   // Ensure location.state is present and has the expected values for modification
-//   //   if (location?.state?.stopLossPricez !== undefined && location?.state?.takeProfitPricex !== undefined) {
-//   //     // Destructure the relevant values from the location state
-//   //     const { stopLossPricez, takeProfitPricex } = location.state;
-
-//   //     // Update the chart lines with the received values
-//   //     const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-//   //     stopLossLine.current?.setData([{ time: currentTime, value: stopLossPricez }]);
-//   //     takeProfitLine.current?.setData([{ time: currentTime, value: takeProfitPricex }]);
-
-//   //     console.log("Chart lines updated with state values:", {
-//   //       stopLossPricez,
-//   //       takeProfitPricex,
-
-//   //     });
-//   //   }
-//   // }, [location.state]); // Dependency on location.state
 
 //   // Effect to initialize the chart with state values when the component mounts
 //   useEffect(() => {
 //     if (
 //       location?.state?.stopLossPricez !== undefined &&
-//       location?.state?.takeProfitPricex !== undefined
+//       location?.state?.takeProfitPricex !== undefined &&
+//       location?.state?.entry_price !== undefined
 //     ) {
-//       const { stopLossPricez, takeProfitPricex } = location.state;
+//       const { stopLossPricez, takeProfitPricex, entry_price } = location.state;
 
 //       // Update the chart lines with the received values
 //       const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
@@ -228,12 +245,16 @@
 //         { time: currentTime, value: takeProfitPricex },
 //       ]);
 
+//       entryLine.current?.setData([{ time: currentTime, value: entry_price }]);
+
 //       setStopLossPrice(stopLossPricez);
 //       setTakeProfit(takeProfitPricex);
+//       setEntryPrice(entry_price);
 
 //       console.log("Chart lines updated with state values:", {
 //         stopLossPricez,
 //         takeProfitPricex,
+//         entry_price,
 //       });
 //     }
 //   }, [location.state]); // Dependency on location.state
@@ -245,49 +266,25 @@
 //     const chartBounds = chartRef.current.getBoundingClientRect();
 //     const yCoord = e.clientY - chartBounds.top;
 //     const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
-//     const tolerance = 0.5; // Adjust based on user experience
 
 //     if (priceAtPoint === null || isNaN(priceAtPoint)) return;
 
-//     // Check proximity to lines and initiate drag
-//     if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
-//       setDraggedLine("stop_loss");
-//       setIsDragging(true);
-//       highlightLine("stop_loss");
-//     } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
-//       setDraggedLine("take_profit");
-//       setIsDragging(true);
-//       highlightLine("take_profit");
-//     } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
-//       setDraggedLine("entry");
-//       setIsDragging(true);
-//       highlightLine("entry");
-//     }
+//     // Start dragging based on the closest line
+//     const distances = [
+//       { type: "stop_loss", distance: Math.abs(priceAtPoint - stopLossPrice) },
+//       { type: "take_profit", distance: Math.abs(priceAtPoint - takeProfit) },
+//       { type: "entry", distance: Math.abs(priceAtPoint - entryPrice) },
+//     ];
+
+//     const closestLine = distances.reduce((prev, current) =>
+//       prev.distance < current.distance ? prev : current
+//     );
+
+//     setDraggedLine(closestLine.type);
+//     setIsDragging(true);
+//     highlightLine(closestLine.type);
 //   };
 
-//   // Function to highlight the selected line
-//   const highlightLine = (lineType) => {
-//     if (lineType === "stop_loss") {
-//       stopLossLine.current?.setOptions({ color: "red", lineWidth: 2 });
-//       takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//       entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//     } else if (lineType === "take_profit") {
-//       stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//       takeProfitLine.current?.setOptions({ color: "green", lineWidth: 2 });
-//       entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//     } else if (lineType === "entry") {
-//       stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//       takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-//       entryLine.current?.setOptions({ color: "blue", lineWidth: 2 });
-//     }
-//   };
-//   // Function to reset the line highlight after dragging ends
-//   //  const resetLineHighlight = () => {
-//   //   stopLossLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
-//   //   takeProfitLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
-//   //   entryLine.current?.setOptions({ color: 'gray', lineWidth: 1 });
-//   // };
-//   // Mouse move handler for smoother drag updates
 //   const mouseMoveHandler = (e) => {
 //     if (!isDragging || !draggedLine || !chartRef.current) return;
 
@@ -297,7 +294,7 @@
 
 //     if (priceAtPoint === null || isNaN(priceAtPoint)) return;
 
-//     // Smooth updates for the dragged line
+//     // Update the corresponding line freely based on dragging
 //     if (draggedLine === "stop_loss") {
 //       setStopLossPrice(priceAtPoint);
 //       stopLossLine.current?.setData([
@@ -316,13 +313,16 @@
 //     }
 //   };
 
-//   // Mouse up handler to end dragging
 //   const mouseUpHandler = () => {
 //     setIsDragging(false);
 //     setDraggedLine(null);
 
-//     if (stopLossPrice && takeProfit) {
-//       handleModifyOrder(stopLossPrice, takeProfit);
+//     if (
+//       draggedLine === "stop_loss" ||
+//       draggedLine === "take_profit" ||
+//       draggedLine === "entry"
+//     ) {
+//       handleModifyOrder(stopLossPrice, takeProfit, entryPrice);
 //     }
 //   };
 
@@ -342,7 +342,7 @@
 
 //   const handlePlaceOrder = async () => {
 //     const orderData = {
-//       symbol: "NQZ4",
+//       symbol: capturedSymbol || NQZ4,
 //       side: isBuyActive ? "Buy" : "Sell", // Update side based on the buy/sell toggle
 //       order_type: orderType,
 //       price: entryPrice, // Assuming you want to use entryPrice as the price
@@ -468,59 +468,6 @@
 //     setLinesAdded(!linesAdded);
 //   };
 
-//   // // Handler for the single click to detect which line to drag
-//   // const singleClickHandler = (e) => {
-//   //   if (!chartInstance.current) return;
-
-//   //   const chartBounds = chartRef.current.getBoundingClientRect();
-//   //   const yCoord = e.clientY - chartBounds.top;
-//   //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
-//   //   const tolerance = 0.5; // Adjust as needed for user experience
-
-//   //   // Check proximity to the horizontal lines
-//   //   if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
-//   //     setDraggedLine("stop_loss");
-//   //     setIsDragging(true);
-//   //   } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
-//   //     setDraggedLine("take_profit");
-//   //     setIsDragging(true);
-//   //   } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
-//   //     setDraggedLine("entry");
-//   //     setIsDragging(true);
-//   //   }
-//   // };
-
-//   // // Mouse move handler to update the price dynamically
-//   // const mouseMoveHandler = (e) => {
-//   //   if (!isDragging || !draggedLine || !chartInstance.current) return;
-
-//   //   const chartBounds = chartRef.current.getBoundingClientRect();
-//   //   const yCoord = e.clientY - chartBounds.top;
-//   //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
-
-//   //   // Update state based on which line is being dragged
-//   //   if (draggedLine === "stop_loss") {
-//   //     setStopLossPrice(priceAtPoint);
-//   //     stopLossLine.current.setData([
-//   //       { time: initialTime, value: priceAtPoint },
-//   //     ]);
-//   //   } else if (draggedLine === "take_profit") {
-//   //     setTakeProfit(priceAtPoint);
-//   //     takeProfitLine.current.setData([
-//   //       { time: initialTime, value: priceAtPoint },
-//   //     ]);
-//   //   } else if (draggedLine === "entry") {
-//   //     setEntryPrice(priceAtPoint);
-//   //     entryLine.current.setData([{ time: initialTime, value: priceAtPoint }]);
-//   //   }
-//   // };
-
-//   // // Mouse up handler to end dragging
-//   // const mouseUpHandler = () => {
-//   //   setIsDragging(false);
-//   //   setDraggedLine(null);
-//   // };
-
 //   useEffect(() => {
 //     // Add event listeners for mouse actions (dragging)
 //     const chartContainer = chartRef.current;
@@ -545,6 +492,10 @@
 //   ]);
 //   return (
 //     <div className="relative p-0.5 w-full h-screen bg-gray-50 flex flex-col">
+//       <div className="flex flex-col items-left space-y-1 p-1 bg-gry-100 rounded-lg shadow-md">
+//         <SearchTicker onSymbolChange={handleSymbolChange} />
+//       </div>
+
 //       <div className="flex flex-1 overflow-hidden">
 //         <Sidebar
 //           togglePriceBoxes={togglePriceBoxes}
@@ -693,7 +644,6 @@
 //           />
 //         </div>
 //       </div>
-
 //       {showCalculator && <TradeCalculator />}
 //     </div>
 //   );
@@ -706,6 +656,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { createChart } from "lightweight-charts";
 import Sidebar from "../../components/ui/Sidebar";
+// import SearchSymbol from "../../components/SearchTicker/SearchTicker";
 import SearchTicker from "../../components/SearchTicker/SearchTicker";
 import { placeOrder } from "../../services/Order/Order";
 import { useNavigate } from "react-router-dom";
@@ -732,6 +683,12 @@ function Dashboard() {
 
   const [quantity, setQuantity] = useState("");
   const [arePricesVisibleModifiy, setarePricesVisibleModifiy] = useState(true);
+  const [capturedSymbol, setCapturedSymbol] = useState("NQ=F");
+
+  const handleSymbolChange = (symbol) => {
+    setCapturedSymbol(symbol); // Update state with the new symbol
+    console.log("Captured Symbol:", symbol); // Log the captured symbol
+  };
 
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -740,24 +697,41 @@ function Dashboard() {
     setStopLossPrice("");
     setTakeProfit("");
   };
-  
 
   // State to store the received order data
   const [orderData, setOrderData] = useState({
     orderId: 0,
-    initialOrderType: '',
+    initialOrderType: "",
     orderQty: 0,
-    stopLossId: '',
+    entry_price: "",
+    stopLossId: "",
     stopLossPricez: 0,
-    takeProfitId: '',
+    takeProfitId: "",
     takeProfitPricex: 0,
     isfromModify: false,
   });
 
   const togglePriceBoxes = () => {
-    setArePricesVisible((prev) => !prev);
-    setShowCalculator(false);
+    setArePricesVisible((prev) => {
+      const newState = !prev;
+  
+      // Ensure lines visibility matches the price box state
+      if (newState) {
+        // If the price box is being shown, ensure lines are added
+        if (!linesAdded) {
+          toggleLines(); // Add lines if they are not already added
+        }
+      } else {
+        // If hiding the price box, ensure lines are removed
+        if (linesAdded) {
+          toggleLines(); // Remove lines if they are currently added
+        }
+      }
+  
+      return newState;
+    });
   };
+  
 
   const toggleBuySell = () => {
     setIsBuyActive((prev) => !prev);
@@ -783,7 +757,6 @@ function Dashboard() {
       crossHair: { mode: 0 },
     });
 
-    // Add candlestick series to the chart
     candlestickSeries.current = chartInstance.current.addCandlestickSeries({
       upColor: "#26a69a",
       downColor: "#ef5350",
@@ -792,16 +765,47 @@ function Dashboard() {
       wickDownColor: "#ef5350",
     });
 
+    stopLossLine.current = chartInstance.current.addLineSeries({
+      color: "red",
+      lineWidth: 2,
+      crosshairMarkerVisible: false,
+      lineStyle: 0,
+    });
+
+    takeProfitLine.current = chartInstance.current.addLineSeries({
+      color: "green",
+      lineWidth: 2,
+      crosshairMarkerVisible: false,
+      lineStyle: 0,
+    });
+
+    entryLine.current = chartInstance.current.addLineSeries({
+      color: "blue",
+      lineWidth: 2,
+      crosshairMarkerVisible: false,
+      lineStyle: 0,
+    });
+
+    return () => {
+      chartInstance.current.remove();
+    };
+  }, []);
+
+  useEffect(() => {
     // Function to fetch and process ticker data
     const fetchData = async () => {
+      if (!capturedSymbol) return; // Avoid fetching if no symbol is set
       try {
-        const apiData = await getTickerData("NQ=F", "2020-01-01", "2024-12-04");
-        console.log("Fetched API data:", apiData); // Debugging line
+        const apiData = await getTickerData(
+          capturedSymbol,
+          "2010-01-01",
+          "2024-12-31"
+        );
+        console.log("Fetched API data:", apiData);
 
-        // Process the fetched data into the format required by the chart
         const chartData = apiData
           .map((item) => ({
-            time: new Date(item.index).getTime() / 1000, // Convert date to Unix timestamp (seconds)
+            time: new Date(item.index).getTime() / 1000, // Convert to Unix timestamp (seconds)
             open: item.open,
             high: item.high,
             low: item.low,
@@ -811,195 +815,98 @@ function Dashboard() {
             (data) =>
               data.time && data.open && data.high && data.low && data.close
           )
-          .sort((a, b) => a.time - b.time); // Sort by time in ascending order
+          .sort((a, b) => a.time - b.time);
 
-        console.log("Formatted chart data:", chartData); // Debugging line
-
-        // Update the chart with the processed data
+        console.log("Formatted chart data:", chartData);
         candlestickSeries.current.setData(chartData);
       } catch (error) {
         console.error("Error fetching ticker data:", error);
       }
     };
 
-    // Call fetchData when the component mounts
-    fetchData();
+    fetchData(); // Call fetchData when the capturedSymbol changes
+  }, [capturedSymbol]);
 
-    // Initialize horizontal lines for Stop Loss, Take Profit, and Entry
-    stopLossLine.current = chartInstance.current.addLineSeries({
-      color: "red",
-      lineWidth: 2, // Solid line width
-      crosshairMarkerVisible: false,
-      lineStyle: 0, // Solid line
-    });
+  useEffect(() => {
+    if (location.state) {
+      const {
+        orderId,
+        initialOrderType,
+        orderQty,
+        entry_price,
+        stopLossId,
+        stopLossPricez,
+        takeProfitId,
+        takeProfitPricex,
+        isfromModify,
+      } = location.state;
 
-    takeProfitLine.current = chartInstance.current.addLineSeries({
-      color: "green",
-      lineWidth: 2, // Solid line width
-      crosshairMarkerVisible: false,
-      lineStyle: 0, // Solid line
-    });
+      console.log("Received State:", {
+        orderId,
+        initialOrderType,
+        orderQty,
+        entry_price,
+        stopLossId,
+        stopLossPricez,
+        takeProfitId,
+        takeProfitPricex,
+        isfromModify,
+      });
 
-    entryLine.current = chartInstance.current.addLineSeries({
-      color: "blue",
-      lineWidth: 2, // Solid line width
-      crosshairMarkerVisible: false,
-      lineStyle: 0, // Solid line
-    });
+      // Update the local state with received data
+      setOrderData({
+        orderId,
+        initialOrderType,
+        orderQty,
+        stopLossId,
+        stopLossPricez,
+        takeProfitId,
+        takeProfitPricex,
+        isfromModify,
+      });
+    }
+  }, [location]);
 
-    // Cleanup function to remove the chart instance when the component unmounts
-    return () => {
-      chartInstance.current.remove();
+  // Handle the modify order process
+  const handleModifyOrder = async (
+    updatedTakeProfitPrice,
+    updatedStopLossPrice,
+    updatedEntryPrice
+  ) => {
+    if (orderData.isfromModify) {
+    // Construct the payload dynamically using orderData
+    const payload = {
+      orderId: orderData?.orderId || 0,
+      orderQty: orderData?.orderQty || 0,
+      orderType: orderData?.initialOrderType || "string",
+      entryPrice: updatedEntryPrice || 0,
+      takeProfitOrderId: orderData?.takeProfitId || 0,
+      takeProfitPrice: updatedTakeProfitPrice || 0,
+      stopLossOrderId: orderData?.stopLossId || 0,
+      stopLossPrice: updatedStopLossPrice || 0,
     };
-  }, []); // Empty dependency array ensures this effect runs only once
-// Update the state with received location data
-useEffect(() => {
-  if (location.state) {
-    const {
-      orderId,
-      initialOrderType,
-      orderQty,
-      stopLossId,
-      stopLossPricez,
-      takeProfitId,
-      takeProfitPricex,
-      isfromModify,
-    } = location.state;
 
-    console.log("Received State:", {
-      orderId,
-      initialOrderType,
-      orderQty,
-      stopLossId,
-      stopLossPricez,
-      takeProfitId,
-      takeProfitPricex,
-      isfromModify,
-    });
+    console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
 
-    // Update the local state with received data
-    setOrderData({
-      orderId,
-      initialOrderType,
-      orderQty,
-      stopLossId,
-      stopLossPricez,
-      takeProfitId,
-      takeProfitPricex,
-      isfromModify,
-    });
+    try {
+      const response = await modifyOrder(payload); // Assuming modifyOrder is your API function
+      console.log("Order Modified:", response);
+      toast.success("Order modified successfully");
+    } catch (error) {
+      toast.error("Error modifying order");
+      console.error("Error modifying order:", error);
+    }
   }
-}, [location]);
-
-// Handle the modify order process
-const handleModifyOrder = async (updatedTakeProfitPrice, updatedStopLossPrice) => {
-  // Construct the payload dynamically using orderData
-  const payload = {
-    orderId: orderData?.orderId || 0,
-    orderQty: orderData?.orderQty || 0,
-    orderType: orderData?.initialOrderType || "string",
-    takeProfitOrderId: orderData?.takeProfitId || 0,
-    takeProfitPrice: updatedTakeProfitPrice || 0,
-    stopLossOrderId: orderData?.stopLossId || 0,
-    stopLossPrice: updatedStopLossPrice || 0,
   };
-
-  console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
-
-  try {
-    const response = await modifyOrder(payload); // Assuming modifyOrder is your API function
-    console.log("Order Modified:", response);
-    toast.success("Order modified successfully");
-  } catch (error) {
-    toast.error("Error modifying order");
-    console.error("Error modifying order:", error);
-  }
-};
-
-  // Handle the state when the location changes
-  // useEffect(() => {
-  //   if (location.state) {
-  //     const {
-  //       orderId,
-  //       initialOrderType,
-  //       orderQty,
-  //       stopLossId,
-  //       stopLossPricez,
-  //       takeProfitId,
-  //       takeProfitPricex,
-  //       isfromModify,
-  //     } = location.state;
-
-  //     console.log("Received State:", {
-  //       orderId,
-  //       initialOrderType,
-  //       orderQty,
-  //       stopLossId,
-  //       stopLossPricez,
-  //       takeProfitId,
-  //       takeProfitPricex,
-  //       isfromModify,
-  //     });
-  //   }
-  // }, [location]);
-
-  // // Handle the modify order process
-  // const handleModifyOrder = async (
-  //   updatedTakeProfitPrice,
-  //   updatedStopLossPrice,
-  //   orderData
-  // ) => {
-  //   const payload = {
-  //     orderId: orderData?.orderId || 0,
-  //     orderQty: orderData?.orderQty || 0,
-  //     orderType: orderData?.initialOrderType || "string",
-  //     takeProfitOrderId: orderData?.takeProfitId || 0,
-  //     takeProfitPrice: updatedTakeProfitPrice || 0, // Default to 0
-  //     stopLossOrderId: orderData?.stopLossId || 0,
-  //     stopLossPrice: updatedStopLossPrice || 0, // Default to 0
-  //   };
-
-  //   console.log("Payload for modify order:", JSON.stringify(payload, null, 2));
-
-  //   try {
-  //     const response = await modifyOrder(payload);
-  //     console.log("Order Modified:", response);
-  //     toast.success("Order modified successfully");
-  //   } catch (error) {
-  //     toast.error("Error modifying order");
-  //     console.error("Error modifying order:", error);
-  //   }
-  // };
-
-
-
-
-  // useEffect(() => {
-  //   // Ensure location.state is present and has the expected values for modification
-  //   if (location?.state?.stopLossPricez !== undefined && location?.state?.takeProfitPricex !== undefined) {
-  //     // Destructure the relevant values from the location state
-  //     const { stopLossPricez, takeProfitPricex } = location.state;
-
-  //     // Update the chart lines with the received values
-  //     const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
-  //     stopLossLine.current?.setData([{ time: currentTime, value: stopLossPricez }]);
-  //     takeProfitLine.current?.setData([{ time: currentTime, value: takeProfitPricex }]);
-
-  //     console.log("Chart lines updated with state values:", {
-  //       stopLossPricez,
-  //       takeProfitPricex,
-
-  //     });
-  //   }
-  // }, [location.state]); // Dependency on location.state
 
   // Effect to initialize the chart with state values when the component mounts
   useEffect(() => {
     if (
       location?.state?.stopLossPricez !== undefined &&
-      location?.state?.takeProfitPricex !== undefined
+      location?.state?.takeProfitPricex !== undefined &&
+      location?.state?.entry_price !== undefined
     ) {
-      const { stopLossPricez, takeProfitPricex } = location.state;
+      const { stopLossPricez, takeProfitPricex, entry_price } = location.state;
 
       // Update the chart lines with the received values
       const currentTime = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
@@ -1011,90 +918,88 @@ const handleModifyOrder = async (updatedTakeProfitPrice, updatedStopLossPrice) =
         { time: currentTime, value: takeProfitPricex },
       ]);
 
+      entryLine.current?.setData([{ time: currentTime, value: entry_price }]);
+
       setStopLossPrice(stopLossPricez);
       setTakeProfit(takeProfitPricex);
+      setEntryPrice(entry_price);
 
       console.log("Chart lines updated with state values:", {
         stopLossPricez,
         takeProfitPricex,
+        entry_price,
       });
     }
   }, [location.state]); // Dependency on location.state
 
-// Function to handle single click events
-const singleClickHandler = (e) => {
-  if (!chartRef.current || !candlestickSeries.current) return;
+  // Function to handle single click events
+  const singleClickHandler = (e) => {
+    if (!chartRef.current || !candlestickSeries.current) return;
 
-  const chartBounds = chartRef.current.getBoundingClientRect();
-  const yCoord = e.clientY - chartBounds.top;
-  const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+    const chartBounds = chartRef.current.getBoundingClientRect();
+    const yCoord = e.clientY - chartBounds.top;
+    const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
 
-  if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+    if (priceAtPoint === null || isNaN(priceAtPoint)) return;
 
-  // Allow unrestricted selection of lines
-  if (draggedLine === null) {
-    setDraggedLine("stop_loss"); // Default to stop loss
+    // Start dragging based on the closest line
+    const distances = [
+      { type: "stop_loss", distance: Math.abs(priceAtPoint - stopLossPrice) },
+      { type: "take_profit", distance: Math.abs(priceAtPoint - takeProfit) },
+      { type: "entry", distance: Math.abs(priceAtPoint - entryPrice) },
+    ];
+
+    const closestLine = distances.reduce((prev, current) =>
+      prev.distance < current.distance ? prev : current
+    );
+
+    setDraggedLine(closestLine.type);
     setIsDragging(true);
-    highlightLine("stop_loss");
-  }
-};
+    // highlightLine(closestLine.type);
+  };
 
-// Function to highlight the selected line
-const highlightLine = (lineType) => {
-  if (lineType === "stop_loss") {
-    stopLossLine.current?.setOptions({ color: "red", lineWidth: 2 });
-    takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-    entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-  } else if (lineType === "take_profit") {
-    stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-    takeProfitLine.current?.setOptions({ color: "green", lineWidth: 2 });
-    entryLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-  } else if (lineType === "entry") {
-    stopLossLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-    takeProfitLine.current?.setOptions({ color: "gray", lineWidth: 1 });
-    entryLine.current?.setOptions({ color: "blue", lineWidth: 2 });
-  }
-};
+  const mouseMoveHandler = (e) => {
+    if (!isDragging || !draggedLine || !chartRef.current) return;
 
-// Mouse move handler for smoother drag updates
-const mouseMoveHandler = (e) => {
-  if (!isDragging || !draggedLine || !chartRef.current) return;
+    const chartBounds = chartRef.current.getBoundingClientRect();
+    const yCoord = e.clientY - chartBounds.top;
+    const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
 
-  const chartBounds = chartRef.current.getBoundingClientRect();
-  const yCoord = e.clientY - chartBounds.top;
-  const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
+    if (priceAtPoint === null || isNaN(priceAtPoint)) return;
 
-  if (priceAtPoint === null || isNaN(priceAtPoint)) return;
+    // Update the corresponding line freely based on dragging
+    if (draggedLine === "stop_loss") {
+      setStopLossPrice(priceAtPoint);
+      stopLossLine.current?.setData([
+        { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+      ]);
+    } else if (draggedLine === "take_profit") {
+      setTakeProfit(priceAtPoint);
+      takeProfitLine.current?.setData([
+        { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+      ]);
+    } else if (draggedLine === "entry") {
+      setEntryPrice(priceAtPoint);
+      entryLine.current?.setData([
+        { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
+      ]);
+    }
+  };
 
-  // Smooth updates for the dragged line
-  if (draggedLine === "stop_loss") {
-    setStopLossPrice(priceAtPoint);
-    stopLossLine.current?.setData([
-      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
-    ]);
-  } else if (draggedLine === "take_profit") {
-    setTakeProfit(priceAtPoint);
-    takeProfitLine.current?.setData([
-      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
-    ]);
-  } else if (draggedLine === "entry") {
-    setEntryPrice(priceAtPoint);
-    entryLine.current?.setData([
-      { time: Math.floor(Date.now() / 1000), value: priceAtPoint },
-    ]);
-  }
-};
-
-// Mouse up handler to end dragging
-const mouseUpHandler = () => {
-  setIsDragging(false);
-  setDraggedLine(null);
-
-  if (stopLossPrice && takeProfit) {
-    handleModifyOrder(stopLossPrice, takeProfit);
-  }
-};
-
+  const mouseUpHandler = () => {
+    setIsDragging(false);
+    setDraggedLine(null);
+    
+  
+    if (
+      draggedLine === "stop_loss" ||
+      draggedLine === "take_profit" ||
+      draggedLine === "entry"
+    ) {
+      handleModifyOrder(stopLossPrice, takeProfit, entryPrice);
+    }
+ 
+  };
 
   // Add event listeners for smooth interaction
   useEffect(() => {
@@ -1238,59 +1143,6 @@ const mouseUpHandler = () => {
     setLinesAdded(!linesAdded);
   };
 
-  // // Handler for the single click to detect which line to drag
-  // const singleClickHandler = (e) => {
-  //   if (!chartInstance.current) return;
-
-  //   const chartBounds = chartRef.current.getBoundingClientRect();
-  //   const yCoord = e.clientY - chartBounds.top;
-  //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
-  //   const tolerance = 0.5; // Adjust as needed for user experience
-
-  //   // Check proximity to the horizontal lines
-  //   if (Math.abs(priceAtPoint - stopLossPrice) < tolerance) {
-  //     setDraggedLine("stop_loss");
-  //     setIsDragging(true);
-  //   } else if (Math.abs(priceAtPoint - takeProfit) < tolerance) {
-  //     setDraggedLine("take_profit");
-  //     setIsDragging(true);
-  //   } else if (Math.abs(priceAtPoint - entryPrice) < tolerance) {
-  //     setDraggedLine("entry");
-  //     setIsDragging(true);
-  //   }
-  // };
-
-  // // Mouse move handler to update the price dynamically
-  // const mouseMoveHandler = (e) => {
-  //   if (!isDragging || !draggedLine || !chartInstance.current) return;
-
-  //   const chartBounds = chartRef.current.getBoundingClientRect();
-  //   const yCoord = e.clientY - chartBounds.top;
-  //   const priceAtPoint = candlestickSeries.current.coordinateToPrice(yCoord);
-
-  //   // Update state based on which line is being dragged
-  //   if (draggedLine === "stop_loss") {
-  //     setStopLossPrice(priceAtPoint);
-  //     stopLossLine.current.setData([
-  //       { time: initialTime, value: priceAtPoint },
-  //     ]);
-  //   } else if (draggedLine === "take_profit") {
-  //     setTakeProfit(priceAtPoint);
-  //     takeProfitLine.current.setData([
-  //       { time: initialTime, value: priceAtPoint },
-  //     ]);
-  //   } else if (draggedLine === "entry") {
-  //     setEntryPrice(priceAtPoint);
-  //     entryLine.current.setData([{ time: initialTime, value: priceAtPoint }]);
-  //   }
-  // };
-
-  // // Mouse up handler to end dragging
-  // const mouseUpHandler = () => {
-  //   setIsDragging(false);
-  //   setDraggedLine(null);
-  // };
-
   useEffect(() => {
     // Add event listeners for mouse actions (dragging)
     const chartContainer = chartRef.current;
@@ -1315,6 +1167,10 @@ const mouseUpHandler = () => {
   ]);
   return (
     <div className="relative p-0.5 w-full h-screen bg-gray-50 flex flex-col">
+      <div className="flex flex-col items-left space-y-1 p-1 bg-gry-100 rounded-lg shadow-md">
+        <SearchTicker onSymbolChange={handleSymbolChange} />
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           togglePriceBoxes={togglePriceBoxes}
@@ -1371,17 +1227,19 @@ const mouseUpHandler = () => {
                 </label>
               </div>
               <div>
-                <label className="block text-gray-700">Entry Price:</label>
-                <input
-                  type="number"
-                  step="0.01" // Ensures input step is 0.01 for two decimal places
-                  value={entryPrice} // Formats the value to two decimals
-                  onChange={(e) =>
-                    setEntryPrice(parseFloat(Number(e.target.value).toFixed(2)))
-                  }
-                  className="mt-1 p-2 border rounded w-full"
-                />
-              </div>
+  <label className="block text-gray-700">Entry Price:</label>
+  <input
+    type="number"
+    step="0.01" // Allows increments of 0.01
+    value={Number(entryPrice).toFixed(2)} // Always display two decimal places
+    onChange={(e) => {
+      const value = parseFloat(e.target.value).toFixed(2); // Format to two decimals
+      setEntryPrice(isNaN(value) ? 0 : value); // Ensure valid number
+    }}
+    className="mt-1 p-2 border rounded w-full"
+  />
+</div>
+
 
               <div>
                 <label className="block text-gray-700">Stop Loss Price:</label>
@@ -1456,14 +1314,13 @@ const mouseUpHandler = () => {
           <div
             ref={chartRef}
             className="flex-1"
-            style={{ height: "560px" }} // Example height for chart
+            style={{ height: "595px" }} // Example height for chart
             onMouseDown={singleClickHandler}
             onMouseMove={mouseMoveHandler}
             onMouseUp={mouseUpHandler}
           />
         </div>
       </div>
-
       {showCalculator && <TradeCalculator />}
     </div>
   );

@@ -51,6 +51,7 @@
       { accessorKey: 'order_id', header: 'Order ID' },
       { accessorKey: 'symbol', header: 'Symbol' },
       { accessorKey: 'quantity', header: 'Quantity' },
+      { accessorKey: 'entry_price', header: 'Entry Price' },
       { accessorKey: 'side', header: 'Side' },
       { accessorKey: 'order_type', header: 'Order Type' },
       { accessorKey: 'api_status', header: 'Status' },
@@ -66,6 +67,7 @@
         orderId: row.original.order_id,
         initialOrderType: row.original.order_type,
         orderQty: row.original.quantity,
+        entry_price: row.original.entry_price,
         stopLossId: row.original.stop_loss?.order_id,
         stopLossPricez: row.original.stop_loss?.price,
         takeProfitId: row.original.take_profit?.order_id,
@@ -78,6 +80,7 @@
           orderId: row.original.order_id,
           initialOrderType: row.original.order_type,
           orderQty: row.original.quantity,
+          entry_price: row.original.entry_price,
           stopLossId: row.original.stop_loss?.order_id,
           stopLossPricez: row.original.stop_loss?.price, // Pass stopLossPrice
           takeProfitId: row.original.take_profit?.order_id,

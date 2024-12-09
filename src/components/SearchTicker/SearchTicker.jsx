@@ -196,20 +196,34 @@ import { FaSearch, FaTimes } from "react-icons/fa";
 
 // Sample symbol data
 const dummySymbols = [
-  { name: "IRFC", description: "INDIAN RAILWAY FIN CORP L", type: "stock", exchange: "NSE" },
-  { name: "RELIANCE", description: "RELIANCE INDUSTRIES LTD", type: "stock", exchange: "NSE" },
-  { name: "HDFCBANK", description: "HDFC BANK LTD", type: "stock", exchange: "NSE" },
-  { name: "EURUSD", description: "EURO FX/U.S. DOLLAR", type: "forex", exchange: "FX" },
-  { name: "BTCUSD", description: "BITCOIN TO USD", type: "crypto", exchange: "Crypto" },
-  { name: "ETHUSD", description: "ETHEREUM TO USD", type: "crypto", exchange: "Crypto" },
-  { name: "SPY", description: "SPDR S&P 500 ETF TRUST", type: "stock", exchange: "NYSE" },
-  { name: "USOIL", description: "CRUDE OIL", type: "forex", exchange: "FX" },
-];
+ 
+    { name: "AAPL", description: "Apple Inc.", type: "stock", exchange: "NASDAQ" },
+    { name: "MSFT", description: "Microsoft Corporation", type: "stock", exchange: "NASDAQ" },
+    { name: "GOOGL", description: "Alphabet Inc. Class A", type: "stock", exchange: "NASDAQ" },
+    { name: "AMZN", description: "Amazon.com Inc.", type: "stock", exchange: "NASDAQ" },
+    { name: "TSLA", description: "Tesla Inc.", type: "stock", exchange: "NASDAQ" },
+    { name: "META", description: "Meta Platforms Inc.", type: "stock", exchange: "NASDAQ" },
+    { name: "BRK.B", description: "Berkshire Hathaway Inc.", type: "stock", exchange: "NYSE" },
+    { name: "JNJ", description: "Johnson & Johnson", type: "stock", exchange: "NYSE" },
+    { name: "V", description: "Visa Inc.", type: "stock", exchange: "NYSE" },
+    { name: "XOM", description: "Exxon Mobil Corporation", type: "stock", exchange: "NYSE" },
+    { name: "BTC-USD", description: "Bitcoin to USD", type: "crypto", exchange: "Crypto" },
+    { name: "ETH-USD", description: "Ethereum to USD", type: "crypto", exchange: "Crypto" },
+    { name: "SPY", description: "SPDR S&P 500 ETF Trust", type: "stock", exchange: "NYSE" },
+    { name: "QQQ", description: "Invesco QQQ Trust", type: "ETF", exchange: "NASDAQ" },
+    { name: "NQ=F", description: "NASDAQ 100 Futures", type: "futures", exchange: "CME" },
+    { name: "CL=F", description: "Crude Oil Futures", type: "futures", exchange: "CME" },
+    { name: "GC=F", description: "Gold Futures", type: "futures", exchange: "CME" },
+    { name: "USO", description: "United States Oil Fund", type: "ETF", exchange: "NYSE" },
+    { name: "SLV", description: "iShares Silver Trust", type: "ETF", exchange: "NYSE" },
+    { name: "RELIANCE", description: "Reliance Industries Ltd.", type: "stock", exchange: "NSE" },
+  ];
+  
 
 const filters = ["All", "Forex", "Crypto", "Options"];
 
 // Symbol Search Modal Component
-const SymbolSearchModal = ({ isOpen, onClose, onSelect }) => {
+const SymbolSearchModal = ({ isOpen, onClose, onSelect, selectedSymbol }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
 
@@ -298,40 +312,47 @@ const SymbolSearchModal = ({ isOpen, onClose, onSelect }) => {
   );
 };
 
-// Main Component to trigger the Modal
-const SearchTicker = () => {
+const SearchTicker = ({ onSymbolChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const handleSymbolSelect = (symbol) => setSearchQuery(symbol);
+  const handleSymbolSelect = (symbol) => {
+    setSearchQuery(symbol);
+    setSelectedSymbol(symbol);
+    console.log("Selected Symbol:", symbol);
+    if (onSymbolChange) {
+      onSymbolChange(symbol); // Send the selected symbol to the parent component
+    }
+  };
 
   return (
     <>
       {/* Header */}
-         <div className="flex items-center border border-gray-300 rounded-full px-3 py-1 w-3/4 max-w-xs hover:shadow-sm transition-shadow">
-          <FaSearch className="text-gray-500 mr-1" />
-          <input
-            type="text"
-            placeholder="Search symbol"
-            value={searchQuery}
-            onClick={openModal}
-            className="w-full outline-none bg-transparent text-sm text-gray-800"
-            readOnly
-          />
-        </div>
- 
+      <div className="flex items-center border border-gray-300 rounded-full px-3 py-1 w-3/4 max-w-xs hover:shadow-sm transition-shadow">
+        <FaSearch className="text-gray-500 mr-1" />
+        <input
+          type="text"
+          placeholder="Search symbol"
+          value={selectedSymbol || searchQuery} // Display selected symbol or search query
+          onClick={openModal}
+          className="w-full outline-none bg-transparent text-sm text-gray-800"
+          readOnly
+        />
+      </div>
+
       {/* Symbol Search Modal */}
       <SymbolSearchModal
         isOpen={isModalOpen}
         onClose={closeModal}
         onSelect={handleSymbolSelect}
+        selectedSymbol={selectedSymbol}
       />
     </>
   );
 };
 
 export default SearchTicker;
-
